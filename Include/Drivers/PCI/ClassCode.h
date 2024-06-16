@@ -1,0 +1,24 @@
+#pragma once
+
+/*
+ * PCI Class Codes
+ */
+
+#define PCI_CLASS_NONE 0x0
+#define PCI_CLASS_STORAGE 0x1
+#define PCI_CLASS_NET 0x2
+#define PCI_CLASS_DISPLAY 0x3
+#define PCI_CLASS_MEDIA 0x4
+#define PCI_CLASS_MEM 0x5
+#define PCI_CLASS_BRIDGE 0x6
+#define PCI_CLASS_COMM 0x7
+#define PCI_CLASS_BASE 0x8
+#define PCI_CLASS_INPUT 0x9
+#define PCI_CLASS_DOCK 0xA
+#define PCI_CLASS_CPU 0xB
+#define PCI_CLASS_SERIAL 0xC
+#define PCI_CLASS_WIRELESS 0xD
+#define PCI_CLASS_INTEL 0xE
+#define PCI_CLASS_SAT 0xF
+#define PCI_CLASS_CRYPT 0x10
+#define PCI_CLASS_SIG 0x11

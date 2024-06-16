@@ -1,0 +1,163 @@
+N11 PUBLIC SOURCE LICENSE
+Version 2.0 - June 2024
+
++==========+
+| PREAMBLE |
++==========+
+
+This document describes a contract between you and N11 Software ("N11").
+Please read it before downloading or using the software. By downloading
+and/or using the software, you accept the terms of this license. If you
+do not or cannot agree to the terms of this license, please do not
+download or use the software.
+
++======================+
+| TERMS AND CONDITIONS |
++======================+
+
+0. This License applies to any program or other work which N11 Software
+("N11") makes open source/publicly available and which contains a notice
+placed by N11 stating that it is subject to the terms of this N11 Public
+Source License version 2.0 (and all other proceeding versions)
+("License").
+
++----------------+
+| 1. DEFINITIONS |
++----------------+
+
+1.1 "Source Code" means the text files of a program that can have
+patches applied to it, including all modules it contains, any associated
+interface definition files, scripts used to control compilation and
+installation of an executable (object code).
+
+1.2 "Object Code" means a compiled version of Source Code that can be
+run by the user.
+
+1.3 "Patches" mean any addition, deletion, or change of Source Code
+authored by a contributor.
+
+1.4 "Contributor" means any person or entity that creates or
+contributes a patch to the Source Code.
+
+1.5 "You" or "Your" means an individual or legal entity exercising rights
+under this License. For legal entities, "You" or "Your" includes any
+entity which controls, is controlled by, or is under common control with,
+You, where "control" means:
+    
+    (a) the power, direct or indirect, to cause the direction or management
+        of such entity, whether by contract or otherwise
+    
+    or
+    
+    (b) ownership of fifty percent (50%) or more of the outstanding shares
+        or beneficial ownership of such entity.
+
+1.6 "N11" means N11 Software and its contributors.
+
++-------------------+
+| 2. PERMITTED USES |
++-------------------+
+
+2. Subject to the terms and conditions of this License, N11 hereby grants
+You, effective on the date You accept this License and download the Source
+Code or Object Code, the following rights:
+
+2.1 You may use, copy, modify, and distribute Source Code, with or without
+Patches, for publishing or Your internal research and development, provided
+that You must in each instance:
+
+    (a) retain and reproduce in all copies of the Source Code the copyright
+        and other proprietary notices and disclaimers of N11 as they appear
+        in the Source Code, and keep intact all notices in the Source Code
+        that refer to this License;
+
+    (b) include a copy of this License with every copy of the Source Code You
+        distribute, and You may not offer or impose any terms on such Source
+        Code that alter or restrict this License or the recipients' rights
+        hereunder;
+
+    (c) refrain from using N11 and other affiliated contributors to promote
+        products deriving from this software without written consent.
+
++-----------------------+
+| 3. REDISTRIBUTION USE |
++-----------------------+
+
+3. You may distribute Object Code for commercial or non-commercial purposes,
+provided that You must in each instance:
+
+    (a) include a copy of this License with every copy of the Object Code You
+        distribute, and You may not offer or impose any terms on the Object
+        Code that alter or restrict this License or the recipients' rights
+        hereunder;
+
+    (b) ensure that the Object Code contains a verbatim copy of the
+        copyright notice, disclaimer, and this License.
+
++-------------+
+| 4. WARRANTY |
++-------------+
+
+4. The Source Code may contain in whole or in part pre-release, untested, or
+not fully tested works. The Source Code could contain errors that could cause
+failures or the loss of data and may be incomplete or contain inaccuracies.
+You agree that use of the code, or any portion, is at Your sole and entire
+risk.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
++----------------------+
+| 5. LIMITED LIABILITY |
++----------------------+
+
+5. IN NO EVENT SHALL N11 OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL,
+INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING,
+WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS
+INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS)
+ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE AND SOURCE CODE,
+EVEN IF N11 HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+
+
+NOTE: The copyright of N11/Inferno has been updated. The copyright
+addendum can be found at the git repository:
+	ssh://n11.dev:23231/health-files.git
+
+README.License.Change
+
+---
+
+June 15, 2024
+
+N11 Software has updated the N11 Public Source License to version 2.0,
+effective immediately. These changes apply to all versions of
+software distributed under this license, as well as the N11/Inferno
+Software Distribution ("NISD").
+
+This update clarifies certain terms, aligns more closly to open-source
+practices, and incorporates feedback from various users.
+
+Specifically, the following has been changed:
+	1. Definitions
+	   - Added a definition for "N11" to clarify it refers to
+	     "N11 Software and its contributors".
+	   - Fixed wording for "Object Code" to specify it is "run by
+	     the user" instead of "ran by the user".
+	2. Permitted Uses
+	   - Fix wording to explicitly grant the rights to use, modify,
+	     and distribute the Source Code or Object Code.
+	3. Redistribution Use
+	   - Introduced a new section specifically addressing the
+	     distribution of Object Code for commercial or
+	     non-commercial purposes.
+
+The NISD license file (Documentation/UserGuide/COPYRIGHT) now reflects
+these changes. If you have not obtained a copy of the License, see the
+health-files.git repository in n11.dev.
+
+Ariston Lorenzo
+Lead Developer
+N11 Software.
+

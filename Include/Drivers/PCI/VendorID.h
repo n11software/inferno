@@ -1,0 +1,6 @@
+#pragma once
+
+#define PCI_VENDOR_ID_INTEL 0x8086
+#define PCI_VENDOR_ID_QEMU 0x1234
+#define PCI_VENDOR_ID_QEMU 0x1b36
+#define PCI_VENDOR_ID_QEMU 0x1af4

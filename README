@@ -1,0 +1,39 @@
+Inferno kernel source tree
+
+This directory contains all kernel source files making up
+the Inferno kernel.
+
+WHAT IS INFERNO?
+
+	Inferno is a kernel built for the N11/Inferno Software Distribution
+	(NISD). It aims to be under UNIX compiliance.
+
+	It is distributed under the N11 Public Source License - see the
+	accompanying COPYRIGHT file for more details.
+
+CONFIGURING:
+
+	The current build system for Inferno is CMake, commonly in tandem with
+	Ninja. To configure Inferno, execute the following commands:
+
+		$ mkdir build && cd build
+		$ cmake -GNinja ..
+
+	Make sure you have the Hydra (codename for NISD) toolchain in your
+	~/bin directory. If you do not have it installed, please clone the
+	gnu.git repository:
+
+		$ git clone git://n11.dev/nisd/dist/gnu.git
+
+COMPILING:
+
+	To build the kernel, run the following command:
+
+		$ ninja
+
+INSTALLING:
+
+	Clone the nisd.git repository for more information.
+
+		$ git clone git://n11.dev/nisd/nisd.git
+
