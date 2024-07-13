@@ -2,7 +2,7 @@
 #include <Memory/Memory.hpp>
 
 namespace Paging {
-  extern Bitmap map;
+  void Initialize(unsigned char* addr, unsigned long long size);
   void FreePage(void* address);
   void AllocatePage(void* address);
   void FreePages(void* address, unsigned long long size);

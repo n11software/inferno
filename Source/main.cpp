@@ -50,7 +50,7 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	prInfo("mm", "Total Memory: %M", memory);
 
 	unsigned long long kSize = (unsigned long long)&InfernoEnd-(unsigned long long)&InfernoStart;
-	Paging::AllocatePages(&InfernoStart, kSize/1024+1);
+	Paging::AllocatePages(&InfernoStart, kSize/0x1024+1);
 	Paging::AllocatePages(bob->framebuffer->Address, (bob->framebuffer->Size+4096)/4096+1);
 
 	Paging::PageTable* lvl4 = (Paging::PageTable*)Paging::RequestPage();
@@ -87,7 +87,7 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 		i+=4096) {
 		PageTableManager.Map((void*)i, (void*)i);
 	}
-	// asm volatile ("mov %0, %%cr3" : : "r" ((unsigned long long)lvl4)); // FIXME: Causing qemu to reboot
+	asm volatile ("mov %0, %%cr3" : : "r" (lvl4)); // FIXME: Causing qemu to reboot
 
 	// Usermode
 	#if EnableGDT == true

@@ -7,7 +7,7 @@
 
 unsigned long long Size = 0;
 BOB* bob;
-unsigned long long free = 0, used = 0;
+unsigned long long free = 0, used = 0, locked = 0;
 
 void Memory::Init(BOB* bob) {
     void* bitmapAddress = (void*)0;
@@ -28,10 +28,9 @@ void Memory::Init(BOB* bob) {
 
     // Enable 4K allocation aka paging
     memset(bitmapAddress, 0, bitmapSize);
-    Paging::map.Buffer = (unsigned char*)bitmapAddress;
-    Paging::map.Size = Size/4096+1;
+	Paging::Initialize((unsigned char*)bitmapAddress, Size/4096+1);
 
-    Paging::AllocatePages(Paging::map.Buffer, Paging::map.Size/4096+1);
+    Paging::AllocatePages(bitmapAddress, Size/4096+1);
     Paging::AllocatePages(0, Size/4096+1);
 
     for (unsigned long long i=0;i<bob->MapSize/bob->DescriptorSize; i++) {
@@ -44,6 +43,8 @@ void Memory::Init(BOB* bob) {
 unsigned long long Memory::GetSize() { return Size; }
 unsigned long long Memory::GetFree() { return free; }
 unsigned long long Memory::GetUsed() { return used; }
+unsigned long long Memory::GetLocked() { return locked; }
 
 void Memory::SetFree(unsigned long long freeMem) { free = freeMem; }
 void Memory::SetUsed(unsigned long long usedMem) { used = usedMem; }
+void Memory::SetLocked(unsigned long long lockedMem) { locked = lockedMem; }

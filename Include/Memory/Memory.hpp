@@ -13,8 +13,9 @@
 
 namespace Memory {
     void Init(BOB* bob);
-    unsigned long long GetSize(), GetUsed(), GetFree();
+    unsigned long long GetSize(), GetUsed(), GetFree(), GetLocked();
     void SetUsed(unsigned long long used);
+    void SetLocked(unsigned long long rsrvd);
     void SetFree(unsigned long long free);
 }
 

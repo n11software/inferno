@@ -4,20 +4,29 @@
 // TODO: Use memset and memcpy for bitmap and then use memset for multiple pages
 
 
-Bitmap Paging::map;
+Bitmap* map;
+
+void Paging::Initialize(unsigned char* addr, unsigned long long size) {
+  memset(addr, 0, size);
+  map->Size = size;
+  kprintf("Size: %M\n", map->Size);
+  map->Buffer = addr;
+}
 
 void Paging::FreePage(void* address) {
+  unsigned long long index = (unsigned long long)address/4096;
   // Check if page is already free
-  if (Paging::map[(unsigned long long)address/4096]==false) return;
-  Paging::map.Set((unsigned long long)address/4096, false);
+  if (map->operator[](index)==false) return;
+  if (!map->Set(index, false)) kprintf("Error whilst allocating 0x%x\n", address);
   Memory::SetFree(Memory::GetFree()+4096);
   Memory::SetUsed(Memory::GetUsed()-4096);
 }
 
 void Paging::AllocatePage(void* address) {
+  unsigned long long index = (unsigned long long)address/4096;
   // Check if page is already allocated
-  if (Paging::map[(unsigned long long)address/4096]==true) return;
-  if (!Paging::map.Set((unsigned long long)address/4096, true)) kprintf("Error whilst allocating 0x%x\n", address);
+  if (map->operator[](index)==true) return;
+  if (!map->Set(index, true)) kprintf("Error whilst allocating 0x%x\n", address);
   Memory::SetFree(Memory::GetFree()-4096);
   Memory::SetUsed(Memory::GetUsed()+4096);
 }
@@ -32,10 +41,9 @@ void Paging::AllocatePages(void* address, unsigned long long size) {
     Paging::AllocatePage((void*)((unsigned long long)address + (x*4096)));
 }
 
-unsigned long long ReqIndex = 0;
 void* Paging::RequestPage() {
-  for (;ReqIndex<Paging::map.Size*8;ReqIndex++) {
-    if (Paging::map[ReqIndex]==true) continue;
+  for (unsigned long long ReqIndex;ReqIndex<map->Size*8;ReqIndex++) {
+    if (map->operator[](ReqIndex)==true) continue;
     Paging::AllocatePage((void*)(ReqIndex*4096));
     return (void*)(ReqIndex*4096);
     // TODO: Implement Look ahead
@@ -72,7 +80,7 @@ Paging::TableManager::TableManager(PageTable* Level4Address) {
 }
 
 void Paging::TableManager::Map(void* virt, void* address) {
-  Paging::MapIndexer i((unsigned long long)virt);
+  Paging::MapIndexer i = Paging::MapIndexer((unsigned long long)virt);
   Page PDE;
 
   PDE = Level4Address->pages[i[3]];
