@@ -1,3 +1,0 @@
-/home/levih/NISD/kernel/build/CMakeFiles/kernel.dir
-/home/levih/NISD/kernel/build/CMakeFiles/edit_cache.dir
-/home/levih/NISD/kernel/build/CMakeFiles/rebuild_cache.dir
