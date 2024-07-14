@@ -47,7 +47,7 @@ build cmake_object_order_depends_target_kernel: phony || .
 build CMakeFiles/kernel.dir/Source/CPU/CPU.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/CPU/CPU.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/CPU/CPU.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/CPU
@@ -55,7 +55,7 @@ build CMakeFiles/kernel.dir/Source/CPU/CPU.cpp.obj: CXX_COMPILER__kernel_unscann
 build CMakeFiles/kernel.dir/Source/CPU/CPUID.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/CPU/CPUID.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/CPU/CPUID.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/CPU
@@ -63,7 +63,7 @@ build CMakeFiles/kernel.dir/Source/CPU/CPUID.cpp.obj: CXX_COMPILER__kernel_unsca
 build CMakeFiles/kernel.dir/Source/CPU/IO.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/CPU/IO.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/CPU/IO.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/CPU
@@ -71,7 +71,7 @@ build CMakeFiles/kernel.dir/Source/CPU/IO.cpp.obj: CXX_COMPILER__kernel_unscanne
 build CMakeFiles/kernel.dir/Source/Drivers/ACPI/ACPI.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/ACPI/ACPI.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/ACPI/ACPI.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/ACPI
@@ -79,7 +79,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/ACPI/ACPI.cpp.obj: CXX_COMPILER__kern
 build CMakeFiles/kernel.dir/Source/Drivers/CMOS/CMOS.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/CMOS/CMOS.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/CMOS/CMOS.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/CMOS
@@ -87,7 +87,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/CMOS/CMOS.cpp.obj: CXX_COMPILER__kern
 build CMakeFiles/kernel.dir/Source/Drivers/PCI/Access.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/PCI/Access.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/PCI/Access.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/PCI
@@ -95,7 +95,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/PCI/Access.cpp.obj: CXX_COMPILER__ker
 build CMakeFiles/kernel.dir/Source/Drivers/PCI/PCI.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/PCI/PCI.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/PCI/PCI.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/PCI
@@ -103,7 +103,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/PCI/PCI.cpp.obj: CXX_COMPILER__kernel
 build CMakeFiles/kernel.dir/Source/Drivers/RTC/EpochTime.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/RTC/EpochTime.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/RTC/EpochTime.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/RTC
@@ -111,7 +111,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/RTC/EpochTime.cpp.obj: CXX_COMPILER__
 build CMakeFiles/kernel.dir/Source/Drivers/RTC/GenericRTC.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/RTC/GenericRTC.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/RTC/GenericRTC.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/RTC
@@ -119,7 +119,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/RTC/GenericRTC.cpp.obj: CXX_COMPILER_
 build CMakeFiles/kernel.dir/Source/Drivers/Storage/ATA/AHCI.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/Storage/ATA/AHCI.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/Storage/ATA/AHCI.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/Storage/ATA
@@ -127,7 +127,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/Storage/ATA/AHCI.cpp.obj: CXX_COMPILE
 build CMakeFiles/kernel.dir/Source/Drivers/Storage/NVMe/NVMe.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/Storage/NVMe/NVMe.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/Storage/NVMe/NVMe.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/Storage/NVMe
@@ -135,7 +135,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/Storage/NVMe/NVMe.cpp.obj: CXX_COMPIL
 build CMakeFiles/kernel.dir/Source/Drivers/TTY/COM.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/TTY/COM.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/TTY/COM.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/TTY
@@ -143,7 +143,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/TTY/COM.cpp.obj: CXX_COMPILER__kernel
 build CMakeFiles/kernel.dir/Source/Drivers/TTY/TTY.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Drivers/TTY/TTY.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Drivers/TTY/TTY.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Drivers/TTY
@@ -151,7 +151,7 @@ build CMakeFiles/kernel.dir/Source/Drivers/TTY/TTY.cpp.obj: CXX_COMPILER__kernel
 build CMakeFiles/kernel.dir/Source/Interrupts/APIC.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Interrupts/APIC.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Interrupts/APIC.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Interrupts
@@ -159,7 +159,7 @@ build CMakeFiles/kernel.dir/Source/Interrupts/APIC.cpp.obj: CXX_COMPILER__kernel
 build CMakeFiles/kernel.dir/Source/Interrupts/DoublePageFault.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Interrupts/DoublePageFault.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Interrupts/DoublePageFault.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Interrupts
@@ -167,7 +167,7 @@ build CMakeFiles/kernel.dir/Source/Interrupts/DoublePageFault.cpp.obj: CXX_COMPI
 build CMakeFiles/kernel.dir/Source/Interrupts/Interrupts.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Interrupts/Interrupts.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Interrupts/Interrupts.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Interrupts
@@ -175,7 +175,7 @@ build CMakeFiles/kernel.dir/Source/Interrupts/Interrupts.cpp.obj: CXX_COMPILER__
 build CMakeFiles/kernel.dir/Source/Interrupts/PageFault.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Interrupts/PageFault.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Interrupts/PageFault.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Interrupts
@@ -183,7 +183,7 @@ build CMakeFiles/kernel.dir/Source/Interrupts/PageFault.cpp.obj: CXX_COMPILER__k
 build CMakeFiles/kernel.dir/Source/Interrupts/Syscall.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Interrupts/Syscall.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Interrupts/Syscall.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Interrupts
@@ -191,7 +191,7 @@ build CMakeFiles/kernel.dir/Source/Interrupts/Syscall.cpp.obj: CXX_COMPILER__ker
 build CMakeFiles/kernel.dir/Source/Memory/Mem_.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Memory/Mem_.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Memory/Mem_.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Memory
@@ -199,7 +199,7 @@ build CMakeFiles/kernel.dir/Source/Memory/Mem_.cpp.obj: CXX_COMPILER__kernel_uns
 build CMakeFiles/kernel.dir/Source/Memory/Memory.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Memory/Memory.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Memory/Memory.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Memory
@@ -207,7 +207,7 @@ build CMakeFiles/kernel.dir/Source/Memory/Memory.cpp.obj: CXX_COMPILER__kernel_u
 build CMakeFiles/kernel.dir/Source/Memory/Paging.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Memory/Paging.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Memory/Paging.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Memory
@@ -215,7 +215,7 @@ build CMakeFiles/kernel.dir/Source/Memory/Paging.cpp.obj: CXX_COMPILER__kernel_u
 build CMakeFiles/kernel.dir/Source/Memory/brk.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Memory/brk.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Memory/brk.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Memory
@@ -223,7 +223,7 @@ build CMakeFiles/kernel.dir/Source/Memory/brk.cpp.obj: CXX_COMPILER__kernel_unsc
 build CMakeFiles/kernel.dir/Source/Memory/malloc.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Memory/malloc.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Memory/malloc.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Memory
@@ -231,7 +231,7 @@ build CMakeFiles/kernel.dir/Source/Memory/malloc.cpp.obj: CXX_COMPILER__kernel_u
 build CMakeFiles/kernel.dir/Source/Utils/Log.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/Utils/Log.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/Utils/Log.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source/Utils
@@ -239,7 +239,7 @@ build CMakeFiles/kernel.dir/Source/Utils/Log.cpp.obj: CXX_COMPILER__kernel_unsca
 build CMakeFiles/kernel.dir/Source/main.cpp.obj: CXX_COMPILER__kernel_unscanned_ /home/levih/NISD/kernel/Source/main.cpp || cmake_object_order_depends_target_kernel
   DEFINES = -DkernelVersion=\"0.1alpha\"
   DEP_FILE = CMakeFiles/kernel.dir/Source/main.cpp.obj.d
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
   INCLUDES = -I/home/levih/NISD/kernel/Include
   OBJECT_DIR = CMakeFiles/kernel.dir
   OBJECT_FILE_DIR = CMakeFiles/kernel.dir/Source
@@ -260,8 +260,8 @@ build CMakeFiles/kernel.dir/Source/CPU/LoadGDT.s.obj: ASM_NASM_COMPILER__kernel_
 # Link the executable kernel
 
 build kernel: CXX_EXECUTABLE_LINKER__kernel_ CMakeFiles/kernel.dir/Source/CPU/CPU.cpp.obj CMakeFiles/kernel.dir/Source/CPU/CPUID.cpp.obj CMakeFiles/kernel.dir/Source/CPU/IO.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/ACPI/ACPI.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/CMOS/CMOS.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/PCI/Access.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/PCI/PCI.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/RTC/EpochTime.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/RTC/GenericRTC.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/Storage/ATA/AHCI.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/Storage/NVMe/NVMe.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/TTY/COM.cpp.obj CMakeFiles/kernel.dir/Source/Drivers/TTY/TTY.cpp.obj CMakeFiles/kernel.dir/Source/Interrupts/APIC.cpp.obj CMakeFiles/kernel.dir/Source/Interrupts/DoublePageFault.cpp.obj CMakeFiles/kernel.dir/Source/Interrupts/Interrupts.cpp.obj CMakeFiles/kernel.dir/Source/Interrupts/PageFault.cpp.obj CMakeFiles/kernel.dir/Source/Interrupts/Syscall.cpp.obj CMakeFiles/kernel.dir/Source/Memory/Mem_.cpp.obj CMakeFiles/kernel.dir/Source/Memory/Memory.cpp.obj CMakeFiles/kernel.dir/Source/Memory/Paging.cpp.obj CMakeFiles/kernel.dir/Source/Memory/brk.cpp.obj CMakeFiles/kernel.dir/Source/Memory/malloc.cpp.obj CMakeFiles/kernel.dir/Source/Utils/Log.cpp.obj CMakeFiles/kernel.dir/Source/main.cpp.obj CMakeFiles/kernel.dir/Source/CPU/LoadGDT.s.obj | /home/levih/NISD/kernel/linker.ld
-  FLAGS = -ffreestanding -fshort-wchar -g -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
-  LINK_FLAGS = -static -Bsymbolic -T/home/levih/NISD/kernel/linker.ld -fno-stack-protector -nostdlib -e main
+  FLAGS = -ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions
+  LINK_FLAGS = -T/home/levih/NISD/kernel/linker.ld -static -Bsymbolic -nostdlib -e main
   OBJECT_DIR = CMakeFiles/kernel.dir
   POST_BUILD = :
   PRE_LINK = :

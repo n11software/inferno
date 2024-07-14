@@ -22,22 +22,6 @@ void Memory::Init(BOB* bob) {
     }
 
     free = Size;
-
-    kprintf("BM Address: 0x%x-0x%x\n", bitmapAddress, (unsigned long long)bitmapAddress+bitmapSize);
-    kprintf("FB Address: 0x%x-0x%x\n", bob->framebuffer->Address, (unsigned long long)bob->framebuffer->Address+bob->framebuffer->Size);
-
-    // Enable 4K allocation aka paging
-    memset(bitmapAddress, 0, bitmapSize);
-	Paging::Initialize((unsigned char*)bitmapAddress, Size/4096+1);
-
-    Paging::AllocatePages(bitmapAddress, Size/4096+1);
-    Paging::AllocatePages(0, Size/4096+1);
-
-    for (unsigned long long i=0;i<bob->MapSize/bob->DescriptorSize; i++) {
-        MemoryDescriptor* descriptor = (MemoryDescriptor*)((unsigned long long)bob->MemoryMap + (i * bob->DescriptorSize));
-        if (descriptor->Type == 7)
-            Paging::FreePages(descriptor->PhysicalStart, descriptor->NumberOfPages);
-    }
 }
 
 unsigned long long Memory::GetSize() { return Size; }

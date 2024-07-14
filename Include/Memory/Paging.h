@@ -1,46 +1,38 @@
 #pragma once
 #include <Memory/Memory.hpp>
+#include <stdint.h>
+#include <stddef.h>
 
-namespace Paging {
-  void Initialize(unsigned char* addr, unsigned long long size);
-  void FreePage(void* address);
-  void AllocatePage(void* address);
-  void FreePages(void* address, unsigned long long size);
-  void AllocatePages(void* address, unsigned long long size);
-  void* RequestPage();
+#define PAGE_SIZE 4096
+#define PAGE_PRESENT 0x1
+#define PAGE_WRITE 0x2
 
-  struct Page {
-    bool isPresent:1;
-    bool RW:1;
-    bool Super:1;
-    bool WriteThrough:1;
-    bool isCached:1;
-    bool isAccessed:1;
-    bool null0:1;
-    bool isLarger:1;
-    bool null1:1;
+class PhysicalMemoryManager {
+public:
+    PhysicalMemoryManager(uint64_t* bitmap, uint64_t total_memory);
 
-    unsigned char KernelSpecific:3;
-    unsigned long long Address:52;
-  };
+    void* alloc_page();
+    void free_page(void* page);
+    void lock_address(void* address);
+	void lock_addresses(void* address, uint64_t size);
 
-  struct PageTable {
-    Page pages[512];
-  }__attribute__((aligned(0x1000)));
+private:
+    uint64_t* memory_bitmap;
+    uint64_t total_pages;
+};
 
-  class MapIndexer {
-    public:
-      MapIndexer(unsigned long long address);
-      unsigned long long operator[](unsigned char key) const;
-    private:
-      unsigned long long Level4Index, Level3Index, Level2Index, Level1Index;
-  };
+class Paging {
+public:
+    Paging(PhysicalMemoryManager& pmm);
 
-  class TableManager {
-    public:
-      TableManager(PageTable* Level4Address);
-      void Map(void* virt, void* address);
-    private:
-      PageTable* Level4Address;
-  };
-}
+    void load_paging();
+    void enable_paging();
+    void map_page(uint64_t phys_addr, uint64_t virt_addr);
+    uint64_t* pml4;
+    uint64_t* pdpt;
+    uint64_t* pd;
+    uint64_t* pt;
+
+private:
+    PhysicalMemoryManager& pmm;
+};

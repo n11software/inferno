@@ -20,8 +20,8 @@
 #include <Interrupts/Interrupts.hpp>
 #include <Interrupts/PageFault.hpp>
 #include <Interrupts/Syscall.hpp>
-#include <Memory/Memory.hpp>
 #include <Memory/Mem_.hpp>
+#include <Memory/Memory.hpp>
 #include <Memory/Paging.h>
 #include <CPU/CPUID.h>
 #include <Inferno/Log.h>
@@ -31,8 +31,8 @@
 #include <Drivers/RTC/RTC.h>
 #include <Drivers/PCI/PCI.h>
 
-extern unsigned long long InfernoStart;
-extern unsigned long long InfernoEnd;
+extern unsigned long long _InfernoEnd;
+extern unsigned long long _InfernoStart;
 
 __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	prInfo("kernel", "Inferno kernel version 0.1alpha");
@@ -43,20 +43,53 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	// CPU
 	CPU::CPUDetect();
 
-	// Memory
+
+	// Create IDT
+	// Interrupts::CreateIDT();
+	
+	// // Load IDT
+	// Interrupts::LoadIDT();
+	// prInfo("idt", "initialized IDT");
+
+	// // Create a test ISR
+	// Interrupts::CreateISR(0x80, (void*)SyscallHandler);
+	// Interrupts::CreateISR(0x0E, (void*)PageFault);
+	// Interrupts::CreateISR(0x08, (void*)DoublePageFault);
+
+	// Interrupts::Enable();
+	// Interrupts::LoadIDT();
+
+	// uint64_t* ptr = (uint64_t*)0xdeadbeef;
+    // *ptr = 42;
+
+
+	uint64_t bitmap[128] = {0};
+	
+	kprintf("Init Memory\n");
 	Memory::Init(bob);
-	unsigned long long memory = Memory::GetSize();
-	if (memory < 1073741824 && memory > 269484032) memory -= 269484032;
-	prInfo("mm", "Total Memory: %M", memory);
+	kprintf("Done\n");
+	unsigned long long TM = Memory::GetSize();
+	_InfernoStart = (unsigned long long)bob->KernelAddress;
+	_InfernoEnd = (unsigned long long)bob->KernelSize;
+    kprintf("InfernoStart: %x\n", _InfernoStart);
+    kprintf("InfernoEnd: %x\n", _InfernoEnd);
 
-	unsigned long long kSize = (unsigned long long)&InfernoEnd-(unsigned long long)&InfernoStart;
-	Paging::AllocatePages(&InfernoStart, kSize/0x1024+1);
-	Paging::AllocatePages(bob->framebuffer->Address, (bob->framebuffer->Size+4096)/4096+1);
-
-	Paging::PageTable* lvl4 = (Paging::PageTable*)Paging::RequestPage();
-	memset(lvl4, 0, 4096);
-
-	Paging::TableManager PageTableManager(lvl4);
+	PhysicalMemoryManager pmm(bitmap, TM);
+	pmm.lock_addresses(bob->KernelAddress, bob->KernelSize);
+	Paging paging(pmm);
+    paging.map_page((uint64_t)paging.pml4, (uint64_t)paging.pml4);
+    paging.map_page((uint64_t)paging.pdpt, (uint64_t)paging.pdpt);
+    paging.map_page((uint64_t)paging.pd, (uint64_t)paging.pd);
+    paging.map_page((uint64_t)paging.pt, (uint64_t)paging.pt);
+	uint64_t kernel_start = (uint64_t)bob->KernelAddress;
+    uint64_t kernel_end = kernel_start + bob->KernelSize +4096;
+    for (uint64_t addr = kernel_start; addr < kernel_end; addr += PAGE_SIZE) {
+        paging.map_page(addr, addr);
+    }
+	kprintf("Enabling PageTable\n");
+	paging.enable_paging();
+	kprintf("Loading PageTable\n");
+	paging.load_paging();
 
 	// Load APIC
 	if (APIC::Capable()) {
@@ -65,29 +98,6 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	}
 
 	PCI::init();
-
-
-	// Create IDT
-	Interrupts::CreateIDT();
-	
-	// Load IDT
-	Interrupts::LoadIDT();
-	prInfo("idt", "initialized IDT");
-
-	// Create a test ISR
-	Interrupts::CreateISR(0x80, (void*)SyscallHandler);
-	Interrupts::CreateISR(0x0E, (void*)PageFault);
-	Interrupts::CreateISR(0x08, (void*)DoublePageFault);
-
-	for (unsigned long long i = 0; i < Memory::GetSize();i+=4096) {
-		PageTableManager.Map((void*)i, (void*)i);
-	}
-	for (unsigned long long i = (unsigned long long)bob->framebuffer->Address;
-		i < (unsigned long long)bob->framebuffer->Address+(unsigned long long)bob->framebuffer->Size;
-		i+=4096) {
-		PageTableManager.Map((void*)i, (void*)i);
-	}
-	asm volatile ("mov %0, %%cr3" : : "r" (lvl4)); // FIXME: Causing qemu to reboot
 
 	// Usermode
 	#if EnableGDT == true

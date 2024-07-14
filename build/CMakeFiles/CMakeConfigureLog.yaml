@@ -457,8 +457,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-Xv8ReL"
-      binary: "/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-Xv8ReL"
+      source: "/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-pjb6xq"
+      binary: "/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-pjb6xq"
     cmakeVariables:
       CMAKE_C_FLAGS: ""
       CMAKE_C_FLAGS_DEBUG: "-g"
@@ -467,10 +467,10 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-Xv8ReL'
+        Change Dir: '/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-pjb6xq'
         
-        Run Build Command(s): /usr/bin/ninja -v cmTC_eeee0
-        [1/2] /usr/bin/x86_64-hydra-gcc   -v -o CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.obj -c /usr/share/cmake/Modules/CMakeCCompilerABI.c
+        Run Build Command(s): /usr/bin/ninja -v cmTC_4dc8b
+        [1/2] /usr/bin/x86_64-hydra-gcc   -v -o CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.obj -c /usr/share/cmake/Modules/CMakeCCompilerABI.c
         Using built-in specs.
         COLLECT_GCC=/usr/bin/x86_64-hydra-gcc
         Target: x86_64-hydra
@@ -478,8 +478,8 @@ events:
         Thread model: single
         Supported LTO compression algorithms: zlib zstd
         gcc version 12.2.0 (GCC) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_eeee0.dir/'
-         /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/cc1 -quiet -v -iprefix /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/ /usr/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_eeee0.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -o /tmp/ccu9wsAS.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_4dc8b.dir/'
+         /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/cc1 -quiet -v -iprefix /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/ /usr/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_4dc8b.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -o /tmp/cc1katZt.s
         GNU C17 (GCC) version 12.2.0 (x86_64-hydra)
         	compiled by GNU C version 14.1.1 20240522, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
         
@@ -500,15 +500,15 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: 5a7142dfd1d0f8a274207f42621c9f0a
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_eeee0.dir/'
-         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/as -v -o CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.obj /tmp/ccu9wsAS.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_4dc8b.dir/'
+         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/as -v -o CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.obj /tmp/cc1katZt.s
         GNU assembler version 2.39 (x86_64-hydra) using BFD version (GNU Binutils) 2.39
         COMPILER_PATH=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/:/usr/bin/../libexec/gcc/:/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/
         LIBRARY_PATH=/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/:/usr/bin/../lib/gcc/:/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.'
-        [2/2] : && /usr/bin/x86_64-hydra-gcc  -v CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.obj -o cmTC_eeee0   && :
-        FAILED: cmTC_eeee0 
-        : && /usr/bin/x86_64-hydra-gcc  -v CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.obj -o cmTC_eeee0   && :
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.'
+        [2/2] : && /usr/bin/x86_64-hydra-gcc  -v CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.obj -o cmTC_4dc8b   && :
+        FAILED: cmTC_4dc8b 
+        : && /usr/bin/x86_64-hydra-gcc  -v CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.obj -o cmTC_4dc8b   && :
         Using built-in specs.
         COLLECT_GCC=/usr/bin/x86_64-hydra-gcc
         COLLECT_LTO_WRAPPER=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/lto-wrapper
@@ -519,8 +519,8 @@ events:
         gcc version 12.2.0 (GCC) 
         COMPILER_PATH=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/:/usr/bin/../libexec/gcc/:/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/
         LIBRARY_PATH=/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/:/usr/bin/../lib/gcc/:/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_eeee0' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_eeee0.'
-         /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/collect2 -plugin /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/liblto_plugin.so -plugin-opt=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/lto-wrapper -plugin-opt=-fresolution=/tmp/cc0BmCoC.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc --sysroot=/home/levih/NISD/toolchain/Build/x86_64/Root -o cmTC_eeee0 crt0.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crti.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-hydra/12.2.0 -L/usr/bin/../lib/gcc -L/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/lib CMakeFiles/cmTC_eeee0.dir/CMakeCCompilerABI.c.obj -lgcc -lc -lgcc /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtend.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_4dc8b' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_4dc8b.'
+         /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/collect2 -plugin /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/liblto_plugin.so -plugin-opt=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/lto-wrapper -plugin-opt=-fresolution=/tmp/ccMJhYW2.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc --sysroot=/home/levih/NISD/toolchain/Build/x86_64/Root -o cmTC_4dc8b crt0.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crti.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-hydra/12.2.0 -L/usr/bin/../lib/gcc -L/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/lib CMakeFiles/cmTC_4dc8b.dir/CMakeCCompilerABI.c.obj -lgcc -lc -lgcc /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtend.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtn.o
         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/ld: cannot find crt0.o: No such file or directory
         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/ld: cannot find -lc: No such file or directory
         collect2: error: ld returned 1 exit status
@@ -536,8 +536,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-jQhqPQ"
-      binary: "/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-jQhqPQ"
+      source: "/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-kOziB4"
+      binary: "/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-kOziB4"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -547,10 +547,10 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-jQhqPQ'
+        Change Dir: '/home/levih/NISD/kernel/build/CMakeFiles/CMakeScratch/TryCompile-kOziB4'
         
-        Run Build Command(s): /usr/bin/ninja -v cmTC_d8b3e
-        [1/2] /usr/bin/x86_64-hydra-g++   -v -o CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.obj -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /usr/bin/ninja -v cmTC_eda35
+        [1/2] /usr/bin/x86_64-hydra-g++   -v -o CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.obj -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/usr/bin/x86_64-hydra-g++
         Target: x86_64-hydra
@@ -558,8 +558,8 @@ events:
         Thread model: single
         Supported LTO compression algorithms: zlib zstd
         gcc version 12.2.0 (GCC) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d8b3e.dir/'
-         /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/cc1plus -quiet -v -iprefix /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/ /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_d8b3e.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/ccs25nYB.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_eda35.dir/'
+         /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/cc1plus -quiet -v -iprefix /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/ /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_eda35.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/ccIPlfEz.s
         GNU C++17 (GCC) version 12.2.0 (x86_64-hydra)
         	compiled by GNU C version 14.1.1 20240522, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
         
@@ -586,15 +586,15 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: 56710c68b1885ddc92729c2781be447d
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d8b3e.dir/'
-         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/as -v -o CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.obj /tmp/ccs25nYB.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_eda35.dir/'
+         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/as -v -o CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.obj /tmp/ccIPlfEz.s
         GNU assembler version 2.39 (x86_64-hydra) using BFD version (GNU Binutils) 2.39
         COMPILER_PATH=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/:/usr/bin/../libexec/gcc/:/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/
         LIBRARY_PATH=/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/:/usr/bin/../lib/gcc/:/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.'
-        [2/2] : && /usr/bin/x86_64-hydra-g++  -v CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_d8b3e   && :
-        FAILED: cmTC_d8b3e 
-        : && /usr/bin/x86_64-hydra-g++  -v CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_d8b3e   && :
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.'
+        [2/2] : && /usr/bin/x86_64-hydra-g++  -v CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_eda35   && :
+        FAILED: cmTC_eda35 
+        : && /usr/bin/x86_64-hydra-g++  -v CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_eda35   && :
         Using built-in specs.
         COLLECT_GCC=/usr/bin/x86_64-hydra-g++
         COLLECT_LTO_WRAPPER=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/lto-wrapper
@@ -605,8 +605,8 @@ events:
         gcc version 12.2.0 (GCC) 
         COMPILER_PATH=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/:/usr/bin/../libexec/gcc/:/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/
         LIBRARY_PATH=/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/:/usr/bin/../lib/gcc/:/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_d8b3e' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_d8b3e.'
-         /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/collect2 -plugin /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/liblto_plugin.so -plugin-opt=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/lto-wrapper -plugin-opt=-fresolution=/tmp/ccVK1OSl.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc --sysroot=/home/levih/NISD/toolchain/Build/x86_64/Root -o cmTC_d8b3e crt0.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crti.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-hydra/12.2.0 -L/usr/bin/../lib/gcc -L/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/lib CMakeFiles/cmTC_d8b3e.dir/CMakeCXXCompilerABI.cpp.obj -lstdc++ -lgcc -lc -lgcc /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtend.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_eda35' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_eda35.'
+         /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/collect2 -plugin /usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/liblto_plugin.so -plugin-opt=/usr/bin/../libexec/gcc/x86_64-hydra/12.2.0/lto-wrapper -plugin-opt=-fresolution=/tmp/cc7IkHrT.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc --sysroot=/home/levih/NISD/toolchain/Build/x86_64/Root -o cmTC_eda35 crt0.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crti.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-hydra/12.2.0 -L/usr/bin/../lib/gcc -L/usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/lib CMakeFiles/cmTC_eda35.dir/CMakeCXXCompilerABI.cpp.obj -lstdc++ -lgcc -lc -lgcc /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtend.o /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/crtn.o
         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/ld: cannot find crt0.o: No such file or directory
         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/ld: cannot find -lstdc++: No such file or directory
         /usr/bin/../lib/gcc/x86_64-hydra/12.2.0/../../../../x86_64-hydra/bin/ld: cannot find -lc: No such file or directory

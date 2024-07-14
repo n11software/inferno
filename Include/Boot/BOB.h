@@ -21,4 +21,6 @@ struct BOB {
     void* RSDP;
     Framebuffer* framebuffer;
     void* FontFile;
+    void* KernelAddress;
+    unsigned long long KernelSize;
 };
