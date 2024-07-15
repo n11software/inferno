@@ -29,7 +29,7 @@ void PhysicalMemoryManager::free_page(void* page) {
 void PhysicalMemoryManager::lock_address(void* address) {
     uint64_t index = (uint64_t)address / PAGE_SIZE;
     memory_bitmap[index / 64] |= (1ULL << (index % 64));
-    kprintf("Locked address: %p (page index %d)\n", address, index);
+    // kprintf("Locked address: %p (page index %d)\n", address, index);
 }
 
 void PhysicalMemoryManager::lock_addresses(void* address, uint64_t size) {
@@ -38,7 +38,7 @@ void PhysicalMemoryManager::lock_addresses(void* address, uint64_t size) {
 
     for (uint64_t i = start_page; i < end_page; i++) {
         memory_bitmap[i / 64] |= (1ULL << (i % 64));
-        kprintf("Locked page index: %d\n", i);
+        // kprintf("Locked page index: %d\n", i);
     }
 }
 
@@ -100,7 +100,7 @@ void Paging::map_page(uint64_t phys_addr, uint64_t virt_addr) {
 
     uint64_t* page_entry = &((uint64_t*)(*pt_entry & ~0xFFF))[pt_index];
     *page_entry = phys_addr | PAGE_PRESENT | PAGE_WRITE;
-    kprintf("Mapped phys %p to virt %p\n", (void*)phys_addr, (void*)virt_addr);
+    // kprintf("Mapped phys %p to virt %p\n", (void*)phys_addr, (void*)virt_addr);
 }
 
 void Paging::load_paging() {

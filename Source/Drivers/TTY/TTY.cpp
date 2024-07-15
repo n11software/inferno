@@ -2,6 +2,7 @@
 #include <Memory/Mem_.hpp>
 #include <Inferno/stdint.h>
 #include <Inferno/Log.h>
+#include <Memory/Paging.h>
 // #define SSFN_CONSOLEBITMAP_TRUECOLOR
 // #include <ssfn.h>
 
@@ -163,7 +164,8 @@ class Window {
 void test() {
     // no malloc yet so we have to use a static buffer
     buffer = (uint8_t*)0x100000; // TODO: make this dynamic
-    memset(fb->Address, 0, fb->Width * fb->Height * 4);
+    memset(fb->Address, 0xFF, fb->Width * fb->Height * 4);
+	// while (1) asm("hlt");
     for (int i = 0; i < fb->Width; i++) {
         for (int j = 0; j < fb->Height; j++) {
             putpixel(i, j, 0x093c8b);
