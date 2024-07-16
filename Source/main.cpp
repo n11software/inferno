@@ -65,21 +65,16 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	unsigned long long TM = Memory::GetSize();
 	_InfernoStart = (unsigned long long)bob->KernelAddress;
 	_InfernoEnd = (unsigned long long)bob->KernelSize;
-    kprintf("InfernoStart: %x\n", _InfernoStart);
+    kprintf("InfernoStart: %x\n", &_InfernoStart);
     kprintf("InfernoEnd: %x\n", _InfernoEnd);
 
 	PhysicalMemoryManager pmm(bitmap, TM);
-	pmm.lock_addresses(bob->KernelAddress, bob->KernelSize*4096);
+	pmm.lock_addresses(&_InfernoStart, (uint64_t)&_InfernoEnd-(uint64_t)&_InfernoStart*4096);
 	Paging paging(pmm);
     paging.map_page((uint64_t)paging.pml4, (uint64_t)paging.pml4);
     paging.map_page((uint64_t)paging.pdpt, (uint64_t)paging.pdpt);
     paging.map_page((uint64_t)paging.pd, (uint64_t)paging.pd);
     paging.map_page((uint64_t)paging.pt, (uint64_t)paging.pt);
-    paging.map_page(0x000000000ff19fe0, 0x000000000ff19fe0); // Figure out what the addresses are from
-    paging.map_page(0x000000000ff1a000, 0x000000000ff1a000);
-    paging.map_page(0x000000000ff1b000, 0x000000000ff1b000);
-    paging.map_page(0x000000000ff1c5b0, 0x000000000ff1c5b0);
-    paging.map_page(0x00000000c0000000, 0x00000000c0000000);
 	uint64_t kernel_start = (uint64_t)bob->KernelAddress;
     uint64_t kernel_end = kernel_start + bob->KernelSize *4096;
     for (uint64_t addr = kernel_start; addr < kernel_end; addr += PAGE_SIZE) {
@@ -110,6 +105,10 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
         MemoryDescriptor* descriptor = (MemoryDescriptor*)((unsigned long long)bob->MemoryMap + (i * bob->DescriptorSize));
         if (descriptor->Type != 7) {
 			pmm.lock_addresses(descriptor->PhysicalStart, descriptor->NumberOfPages);
+			// Map pages
+			for (unsigned long long j = (uint64_t)descriptor->PhysicalStart; j < (uint64_t)descriptor->PhysicalStart + (uint64_t)descriptor->NumberOfPages * PAGE_SIZE; j += PAGE_SIZE) {
+                paging.map_page(j, j);
+            }
         }
     }
 	kprintf("Enabling PageTable\n");
