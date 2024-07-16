@@ -23,6 +23,7 @@
 #include <Memory/Mem_.hpp>
 #include <Memory/Memory.hpp>
 #include <Memory/Paging.h>
+#include <Memory/Heap.h>
 #include <CPU/CPUID.h>
 #include <Inferno/Log.h>
 #include <Drivers/TTY/TTY.h>
@@ -33,6 +34,10 @@
 
 extern unsigned long long _InfernoEnd;
 extern unsigned long long _InfernoStart;
+
+extern unsigned long long Free, Used;
+PhysicalMemoryManager pmm;
+Paging* paging;
 
 __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	prInfo("kernel", "Inferno kernel version 0.1alpha");
@@ -68,36 +73,36 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
     kprintf("InfernoStart: %x\n", &_InfernoStart);
     kprintf("InfernoEnd: %x\n", _InfernoEnd);
 
-	PhysicalMemoryManager pmm(bitmap, TM);
+	pmm = PhysicalMemoryManager(bitmap, TM);
 	pmm.lock_addresses(&_InfernoStart, (uint64_t)&_InfernoEnd-(uint64_t)&_InfernoStart*4096);
-	Paging paging(pmm);
-    paging.map_page((uint64_t)paging.pml4, (uint64_t)paging.pml4);
-    paging.map_page((uint64_t)paging.pdpt, (uint64_t)paging.pdpt);
-    paging.map_page((uint64_t)paging.pd, (uint64_t)paging.pd);
-    paging.map_page((uint64_t)paging.pt, (uint64_t)paging.pt);
+	paging = &Paging(pmm);
+    paging->map_page((uint64_t)paging->pml4, (uint64_t)paging->pml4);
+    paging->map_page((uint64_t)paging->pdpt, (uint64_t)paging->pdpt);
+    paging->map_page((uint64_t)paging->pd, (uint64_t)paging->pd);
+    paging->map_page((uint64_t)paging->pt, (uint64_t)paging->pt);
 	uint64_t kernel_start = (uint64_t)bob->KernelAddress;
     uint64_t kernel_end = kernel_start + bob->KernelSize *4096;
     for (uint64_t addr = kernel_start; addr < kernel_end; addr += PAGE_SIZE) {
-        paging.map_page(addr, addr);
+        paging->map_page(addr, addr);
     }
 
 	// map fb
 	{uint64_t fb_addr = (unsigned long long)bob->framebuffer->Address;
     uint64_t fb_size = bob->framebuffer->Width*bob->framebuffer->Height*4;
     for (uint64_t addr = fb_addr; addr < fb_addr + fb_size; addr += PAGE_SIZE) {
-        paging.map_page(addr, addr);
+        paging->map_page(addr, addr);
     }
 	pmm.lock_addresses((void*)fb_addr, fb_size/4096);}
 	{uint64_t fb_addr = (unsigned long long)0x100000;
     uint64_t fb_size = bob->framebuffer->Width*bob->framebuffer->Height*4;
     for (uint64_t addr = fb_addr; addr < fb_addr + fb_size; addr += PAGE_SIZE) {
-        paging.map_page(addr, addr);
+        paging->map_page(addr, addr);
     }
 	pmm.lock_addresses((void*)fb_addr, fb_size/4096);}
 	{uint64_t fb_addr = (unsigned long long)0x300000;
     uint64_t fb_size = bob->framebuffer->Width*bob->framebuffer->Height*4;
     for (uint64_t addr = fb_addr; addr < fb_addr + fb_size; addr += PAGE_SIZE) {
-        paging.map_page(addr, addr);
+        paging->map_page(addr, addr);
     }
 	pmm.lock_addresses((void*)fb_addr, fb_size/4096);}
 
@@ -107,14 +112,26 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 			pmm.lock_addresses(descriptor->PhysicalStart, descriptor->NumberOfPages);
 			// Map pages
 			for (unsigned long long j = (uint64_t)descriptor->PhysicalStart; j < (uint64_t)descriptor->PhysicalStart + (uint64_t)descriptor->NumberOfPages * PAGE_SIZE; j += PAGE_SIZE) {
-                paging.map_page(j, j);
+                paging->map_page(j, j);
             }
         }
     }
 	kprintf("Enabling PageTable\n");
-	paging.enable_paging();
+	paging->enable_paging();
 	kprintf("Loading PageTable\n");
-	paging.load_paging();
+	paging->load_paging();
+	InitializeHeap((void*)0x1000, 0x10);
+    kprintf("Free: %m\n", Free);
+    kprintf("Used: %m\n", Used);
+
+	void* t = malloc(0x100);
+	malloc(0x100);
+	malloc(0x100);
+
+	kprintf("TEST: %p\n", (unsigned long long) t);
+	free(t);
+	t = malloc(0x100);
+	kprintf("Free: %p\n", (unsigned long long) t);
 
 	// Load APIC
 	if (APIC::Capable()) {

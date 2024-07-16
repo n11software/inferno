@@ -9,6 +9,7 @@
 
 class PhysicalMemoryManager {
 public:
+    PhysicalMemoryManager() {}
     PhysicalMemoryManager(uint64_t* bitmap, uint64_t total_memory);
 
     void* alloc_page();

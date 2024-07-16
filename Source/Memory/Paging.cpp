@@ -11,10 +11,14 @@ PhysicalMemoryManager::PhysicalMemoryManager(uint64_t* bitmap, uint64_t total_me
     kprintf("PhysicalMemoryManager initialized with %d total pages\n", total_pages);
 }
 
+extern "C" unsigned long long Free, Used;
+
 void* PhysicalMemoryManager::alloc_page() {
     for (uint64_t i = 0; i < total_pages; i++) {
         if (!(memory_bitmap[i / 64] & (1ULL << (i % 64)))) {
             memory_bitmap[i / 64] |= (1ULL << (i % 64));
+			Free -= 4096;
+			Used += 4096;
             return (void*)(i * PAGE_SIZE);
         }
     }
@@ -24,12 +28,16 @@ void* PhysicalMemoryManager::alloc_page() {
 void PhysicalMemoryManager::free_page(void* page) {
     uint64_t index = (uint64_t)page / PAGE_SIZE;
     memory_bitmap[index / 64] &= ~(1ULL << (index % 64));
+	Free += 4096;
+	Used -= 4096;
 }
 
 void PhysicalMemoryManager::lock_address(void* address) {
     uint64_t index = (uint64_t)address / PAGE_SIZE;
     memory_bitmap[index / 64] |= (1ULL << (index % 64));
     // kprintf("Locked address: %p (page index %d)\n", address, index);
+	Free -= 4096;
+	Used += 4096;
 }
 
 void PhysicalMemoryManager::lock_addresses(void* address, uint64_t size) {
