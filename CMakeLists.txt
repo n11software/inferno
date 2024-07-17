@@ -27,7 +27,7 @@ file(GLOB_RECURSE ASM_SRCS Source/*.s)
 set_source_files_properties(${ASM_SRCS} PROPERTIES LANGUAGE ASM_NASM)
 
 # Compile
-set(CMAKE_CXX_FLAGS "-ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions")
+set(CMAKE_CXX_FLAGS "-ffreestanding -fshort-wchar -mabi=sysv -no-pie -mno-red-zone -fpermissive -mgeneral-regs-only -O2 -fno-stack-protector -fno-exceptions -nostdlib")
 add_link_options(-T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld -static -Bsymbolic -nostdlib -e main)
 include_directories(Include)
 add_executable(kernel ${CPP_SRCS} ${ASM_SRCS})
