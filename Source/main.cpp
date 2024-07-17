@@ -124,15 +124,6 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
     kprintf("Free: %m\n", Free);
     kprintf("Used: %m\n", Used);
 
-	void* t = malloc(0x100);
-	malloc(0x100);
-	malloc(0x100);
-
-	kprintf("TEST: %p\n", (unsigned long long) t);
-	free(t);
-	t = malloc(0x100);
-	kprintf("Free: %p\n", (unsigned long long) t);
-
 	// Load APIC
 	if (APIC::Capable()) {
 			APIC::Enable();
@@ -169,7 +160,7 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
 	SetFont(bob->FontFile);
 	Inferno(bob);
 	unsigned long long timeNow = RTC::getEpochTime();
-	kprintf("Hello!\n");
+	test();
 	unsigned long long render = RTC::getEpochTime()-timeNow;
 	prInfo("kernel", "Render time: %ds", render);
 
