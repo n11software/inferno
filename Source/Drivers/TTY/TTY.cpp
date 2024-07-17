@@ -3,9 +3,10 @@
 #include <Inferno/stdint.h>
 #include <Inferno/Log.h>
 #include <Memory/Paging.h>
-#include <Drivers/TTY/Font8x8Basic.h>
 // #define SSFN_CONSOLEBITMAP_TRUECOLOR
 // #include <ssfn.h>
+
+#include <Drivers/TTY/VGA_Font.h>
 
 void* font;
 Framebuffer* fb;
@@ -58,9 +59,9 @@ class Window {
 		}
 
 		void drawChar(char ch, int x, int y, unsigned long long color) {
-			for (int i = 0; i < 8; i++) {
-				for (int j = 0; j < 8; j++) {
-					if (font8x8_basic[ch][i] & (1 << j)) {
+			for (int i = 0; i < 16; i++) {
+				for (int j = 0; j < 9; j++) {
+					if (vga_font[ch][i] & (1 << (8 - j))) {
 						Draw(x + j, y + i, color);
 					}
 				}
@@ -79,15 +80,15 @@ class Window {
 			current_y += 8;
 		}
 
-        void DrawRectangle(int x, int y, int width, int height, int color) {
-            for (int i = x; i < x + width; i++) {
-                for (int j = y; j < y + height; j++) {
-                    if (i >= 0 && i < fb->Width && j >= 0 && j < fb->Height) {
-                        Draw(i, j, color);
-                    }
-                }
-            }
-        }
+		void DrawRectangle(int x, int y, int width, int height, int color) {
+			for (int i = x; i < x + width; i++) {
+				for (int j = y; j < y + height; j++) {
+					if (i >= 0 && i < fb->Width && j >= 0 && j < fb->Height) {
+						Draw(i, j, color);
+					}
+				}
+			}
+		}
 
 		void DrawRectircle(int x, int y, int width, int height, int radius, int color) {
 			int x1 = x + radius;
@@ -175,12 +176,12 @@ class Window {
 			}
 		}
 
-        void Swap() {
-            memcpy(buffer+(4*fb->PPSL*y+4*x), WindowBuffer, 4*fb->PPSL*Height+4*Width);
-        }
-    private:
-        int Width, Height, x, y;
-        uint8_t* WindowBuffer;
+		void Swap() {
+			memcpy(buffer+(4*fb->PPSL*y+4*x), WindowBuffer, 4*fb->PPSL*Height+4*Width);
+		}
+	private:
+		int Width, Height, x, y;
+		uint8_t* WindowBuffer;
 		int current_x = 0;
 		int current_y = 0;
 };
