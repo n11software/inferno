@@ -162,7 +162,6 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	asm volatile("int $0x80" : "=a"(res) : "a"(1), 
 		"d"((unsigned long)"Hello from syscall\n\r"), 
 		"D"((unsigned long)0) : "rcx", "r11", "memory");
-	test();
 }
 
 __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
