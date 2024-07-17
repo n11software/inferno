@@ -3,6 +3,7 @@
 #include <Inferno/stdint.h>
 #include <Inferno/Log.h>
 #include <Memory/Paging.h>
+#include <Drivers/TTY/Font8x8Basic.h>
 // #define SSFN_CONSOLEBITMAP_TRUECOLOR
 // #include <ssfn.h>
 
@@ -55,6 +56,28 @@ class Window {
             WindowBuffer[(4*fb->PPSL*y+4*x)+2] = (color & 0xFF0000) >> 16;
             WindowBuffer[(4*fb->PPSL*y+4*x)+3] = (color & 0xFF000000) >> 24;
         }
+
+		void drawChar(char ch, int x, int y, unsigned long long color) {
+			for (int i = 0; i < 8; i++) {
+				for (int j = 0; j < 8; j++) {
+					if (font8x8_basic[ch][i] & (1 << j)) {
+						Draw(x + j, y + i, color);
+					}
+				}
+			}
+		}
+
+		void drawString(const char* str, int x, int y, unsigned long long color) {
+			current_x = x;
+			current_y = y;
+			while (*str) {
+				drawChar(*str++, current_x, current_y, color);
+				current_x += 8;
+			}
+
+			current_x = 0;
+			current_y += 8;
+		}
 
         void DrawRectangle(int x, int y, int width, int height, int color) {
             for (int i = x; i < x + width; i++) {
@@ -158,6 +181,8 @@ class Window {
     private:
         int Width, Height, x, y;
         uint8_t* WindowBuffer;
+		int current_x = 0;
+		int current_y = 0;
 };
 
 
@@ -182,6 +207,8 @@ void test() {
     test.DrawFilledCircle(14, 14, 6, 0xff0000);
     test.DrawFilledCircle(14+16, 14, 6, 0x00f000);
     test.DrawFilledCircle(14+16+16, 14, 6, 0xffd629);
+
+	test.drawString("Hello World!", (width/2)-(13*8/2), 11, 0);
 
 
     test.DrawRectircle(8, 14+16, width-16, height-8-14-16, 7, 0xf4f4f4);

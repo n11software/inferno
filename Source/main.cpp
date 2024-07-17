@@ -120,7 +120,7 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	paging->enable_paging();
 	kprintf("Loading PageTable\n");
 	paging->load_paging();
-	InitializeHeap((void*)0x1000, 0x10);
+	InitializeHeap((void*)0xf000, 0x10);
     kprintf("Free: %m\n", Free);
     kprintf("Used: %m\n", Used);
 
