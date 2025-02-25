@@ -40,10 +40,14 @@ Window::Window(int x, int y, int width, int height) {
 	this->Width = width;
 	this->Height = height;
 	
-	// create a buffer right after framebuffer (remember we don't have malloc)
-	WindowBuffer = (uint8_t*)fb->Address + fb->Width * fb->Height * 4;
-	buffer = (uint8_t*)WindowBuffer + fb->Width * fb->Height * 4;
-	memcpy(WindowBuffer, buffer+(4*fb->PPSL*y+4), fb->Height + fb->Width * 4);
+	// Allocate buffers at fixed addresses with proper size
+	WindowBuffer = (uint8_t*)0x300000;
+	buffer = (uint8_t*)0x100000;
+	
+	// Initialize the buffer with background color
+	for(int i = 0; i < Width * Height * 4; i++) {
+		WindowBuffer[i] = 0xFF;  // Set to white
+	}
 }
 void Window::Close() {
 	DrawRectangle(0, 0, Width, Height, 0);

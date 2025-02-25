@@ -36,6 +36,7 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	// Initialize TTY
 	setFont(bob->FontFile);
 	setFramebuffer(bob->framebuffer);
+	// test color red
 	prInfo("kernel", "Inferno kernel version 0.1alpha");
 	kprintf("Copyright 2021-2025 N11 Software.\nCopyright 2018-2021 Ariston Lorenzo and Levi Hicks. All rights reserved.\nSee COPYRIGHT in the Inferno source tree for more information.\n");
 
@@ -91,12 +92,12 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
 	prInfo("kernel", "Done!");
 	prInfo("kernel", "Boot time: %ds", render);
 
-	while (1) {
-		unsigned long res = 0;
-		asm volatile("int $0x80" : "=a"(res) : "a"(1), 
-			"d"((unsigned long)"Hello from syscall\n\r"), 
-			"D"((unsigned long)0) : "rcx", "r11", "memory");
-	}
+	// while (1) {
+	// 	unsigned long res = 0;
+	// 	asm volatile("int $0x80" : "=a"(res) : "a"(1), 
+	// 		"d"((unsigned long)"Hello from syscall\n\r"), 
+	// 		"D"((unsigned long)0) : "rcx", "r11", "memory");
+	// }
 
 	while (true) asm("hlt");
 }

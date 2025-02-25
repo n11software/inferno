@@ -15,7 +15,10 @@ void prInfo(const char* subsystem, const char* message, ...) {
 	va_list args;
 	va_start(args, message);
 
-	kprintf("[INFO] %s: ", subsystem);
+	// change color
+	
+
+	kprintf("\033[32m[INFO]\033[0m %s: ", subsystem);
 	for (const char* p = message; *p; ++p) {
 		if (*p == '%') {
 			++p;
@@ -46,7 +49,7 @@ void prErr(const char* subsystem, const char* message, ...) {
 	va_list args;
 	va_start(args, message);
 
-	kprintf("[ERROR] %s: ", subsystem);
+	kprintf("\033[31m[ERROR]\033[0m %s: ", subsystem);
 	for (const char* p = message; *p; ++p) {
 		if (*p == '%') {
 			++p;
@@ -74,7 +77,7 @@ void prWarn(const char* subsystem, const char* message, ...) {
 	va_list args;
 	va_start(args, message);
 
-	kprintf("[WARNING] %s: ", subsystem);
+	kprintf("\033[33m[WARN]\033[0m %s: ", subsystem);
 	for (const char* p = message; *p; ++p) {
 		if (*p == '%') {
 			++p;
@@ -99,7 +102,7 @@ void prDebug(const char* subsystem, const char* message, ...) {
 	va_list args;
 	va_start(args, message);
 
-	kprintf("[DEBUG] %s: ", subsystem);
+	kprintf("\033[35m[DEBUG]\033[0m %s: ", subsystem);
 	for (const char* p = message; *p; ++p) {
 		if (*p == '%') {
 			++p;

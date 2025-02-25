@@ -62,6 +62,9 @@ char consoleBuffer[CONSOLE_ROWS][CONSOLE_COLS + 1];  // +1 for null terminator
 int currentRow = 0;
 int currentCol = 0;
 
+// Add color buffer per line
+uint32_t lineColors[CONSOLE_ROWS] = {0};
+
 void clearConsoleBuffer() {
     for(int i = 0; i < CONSOLE_ROWS; i++) {
         for(int j = 0; j < CONSOLE_COLS; j++) {
@@ -71,6 +74,9 @@ void clearConsoleBuffer() {
     }
     currentRow = 0;
     currentCol = 0;
+    for(int i = 0; i < CONSOLE_ROWS; i++) {
+        lineColors[i] = gui_ ? 0x000000 : 0xFFFFFF;  // Default: black for GUI, white for non-GUI
+    }
     // Clear entire console area
     window.DrawRectircle(8, 37, width-26, height-8-14-26, 7, 0xf4f4f4);
     window.Swap();
@@ -109,15 +115,17 @@ void redrawFromLine(int startRow) {
 }
 
 void scrollBuffer() {
-    // Move all lines up by one
+    // Move text and colors up
     for(int i = 0; i < CONSOLE_ROWS - 1; i++) {
         strcpy(consoleBuffer[i], consoleBuffer[i + 1]);
+        lineColors[i] = lineColors[i + 1];
     }
     // Clear the last line
     for(int j = 0; j < CONSOLE_COLS; j++) {
         consoleBuffer[CONSOLE_ROWS - 1][j] = ' ';
     }
     consoleBuffer[CONSOLE_ROWS - 1][CONSOLE_COLS] = '\0';
+    lineColors[CONSOLE_ROWS - 1] = gui_ ? 0x000000 : 0xFFFFFF;  // Reset to default color
     redrawFromLine(0);
 }
 
@@ -164,10 +172,6 @@ void InitializeSerialDevice() {
     memset(backBuffer, 0x42, COM1Framebuffer->Width * COM1Framebuffer->Height * 4);
 
 	window.DrawRectircle(0, 0, width, height, 7, 0xffffff);
-    window.DrawFilledCircle(14, 14, 6, 0xff0000);
-    window.DrawFilledCircle(14+16, 14, 6, 0x00f000);
-    window.DrawFilledCircle(14+16+16, 14, 6, 0xffd629);
-
     window.DrawRectircle(8, 14+16, width-16, height-8-14-16, 7, 0xf4f4f4);
 	// add title
 	window.drawString("Inferno", 8+((width-16)/2)-30, 9, 0x000000, 2, true);
@@ -178,6 +182,9 @@ void InitializeSerialDevice() {
 
     if (gui_) {
         window.DrawRectircle(0, 0, width, height, 7, 0xFFFFFF);  // White background
+		window.DrawFilledCircle(14, 14, 6, 0xff0000);
+		window.DrawFilledCircle(14+16, 14, 6, 0x00f000);
+		window.DrawFilledCircle(14+16+16, 14, 6, 0xffd629);
         window.DrawRectircle(8, 14+16, width-16, height-8-14-16, 7, 0xF4F4F4);  // Light gray console area
         window.drawString("Inferno", 8+((width-16)/2)-30, 9, 0x000000, 2, true);
         window.Swap();
@@ -202,7 +209,45 @@ int consoleY = 5;
 int screen_x = 0;
 int screen_y = 0;
 
+// Add current color for non-GUI mode
+uint32_t current_color = 0xFFFFFF;
+
+// Add these at file scope
+static bool in_escape_seq = false;
+static int escape_code = 0;
+
 void directPutchar(char c) {
+    if (c == '\033') {
+        in_escape_seq = true;
+        escape_code = 0;
+        return;
+    }
+
+    if (in_escape_seq) {
+        if (c >= '0' && c <= '9') {
+            escape_code = escape_code * 10 + (c - '0');
+            return;
+        }
+        if (c == 'm') {
+            switch (escape_code) {
+                case 0: current_color = 0xFFFFFF; break;
+                case 31: current_color = 0xFF0000; break;
+                case 32: current_color = 0x00FF00; break;
+                case 33: current_color = 0xFFFF00; break;
+                case 34: current_color = 0x0000FF; break;
+                case 35: current_color = 0xFF00FF; break;
+                case 36: current_color = 0x00FFFF; break;
+                case 37: current_color = 0xFFFFFF; break;
+            }
+            in_escape_seq = false;
+            return;
+        }
+        // If we get here with unknown escape sequence, ignore it
+        if (c == '[') return;
+        in_escape_seq = false;
+    }
+
+    // Draw character only if not in escape sequence
     const int CHAR_WIDTH = 8;
     const int CHAR_HEIGHT = 12;
     const int MAX_X = COM1Framebuffer->Width - CHAR_WIDTH;
@@ -252,7 +297,7 @@ void directPutchar(char c) {
                 int y = screen_y + row;
                 if (x < COM1Framebuffer->Width && y < COM1Framebuffer->Height) {
                     uint32_t* pixel = (uint32_t*)(fb_addr + (y * COM1Framebuffer->PPSL * 4) + (x * 4));
-                    *pixel = 0xFFFFFFFF;  // White text
+                    *pixel = current_color;  // Use current color instead of fixed white
                 }
             }
         }
@@ -273,6 +318,9 @@ void kputchar(char a) {
     while (SerialWait() == 0);
     outb(0x3f8, a);
 
+    static bool in_escape = false;
+    static int code = 0;
+
     if (!gui_) {
         if (COM1Framebuffer != nullptr) {
             directPutchar(a);
@@ -280,25 +328,43 @@ void kputchar(char a) {
         return;
     }
 
-    // Use black text for GUI mode
-    const unsigned int text_color = gui_ ? 0x000000 : 0xFFFFFF;
+    if (in_escape) {
+        if (a >= '0' && a <= '9') {
+            code = code * 10 + (a - '0');
+        } else if (a == 'm') {
+            switch (code) {
+                case 0: lineColors[currentRow] = gui_ ? 0x000000 : 0xFFFFFF; break; // Reset to default
+                case 31: lineColors[currentRow] = 0xFF0000; break;
+                case 32: lineColors[currentRow] = 0x00FF00; break;
+                case 33: lineColors[currentRow] = 0xFFFF00; break;
+                case 34: lineColors[currentRow] = 0x0000FF; break;
+                case 35: lineColors[currentRow] = 0xFF00FF; break;
+                case 36: lineColors[currentRow] = 0x00FFFF; break;
+                case 37: lineColors[currentRow] = 0xFFFFFF; break;
+            }
+            in_escape = false;
+            code = 0;
+        }
+        return;
+    }
+
+    if (a == '\033') {
+        in_escape = true;
+        code = 0;
+        return;
+    }
 
     if (a == '\n') {
-        // Terminate current line
-        consoleBuffer[currentRow][currentCol] = '\0';
-        
-        // Clear and draw the completed line
+        // Draw current line with its color
         window.DrawRectircle(8, 37 + (currentRow * LINE_HEIGHT), width-26, LINE_HEIGHT, 7, 0xf4f4f4);
-        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), text_color, 1);
-        
+        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), lineColors[currentRow], 1);
         currentRow++;
         currentCol = 0;
-        
+        lineColors[currentRow] = lineColors[currentRow-1];  // Inherit color from previous line
         if(currentRow >= CONSOLE_ROWS) {
             scrollBuffer();
             currentRow = CONSOLE_ROWS - 1;
         }
-        
         window.Swap();
         swapBuffers();
     } else {
@@ -309,7 +375,7 @@ void kputchar(char a) {
             
             // Draw the completed line
             window.DrawRectircle(8, 37 + (currentRow * LINE_HEIGHT), width-26, LINE_HEIGHT, 7, 0xf4f4f4);
-            window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), text_color, 1);
+            window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), lineColors[currentRow], 1);
             
             currentRow++;
             currentCol = 0;
@@ -328,7 +394,7 @@ void kputchar(char a) {
     }
 
     if (gui_) {
-        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), 0x000000, 1);
+        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), lineColors[currentRow], 1);
     }
 }
 
