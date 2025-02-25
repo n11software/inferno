@@ -11,4 +11,9 @@ SECTIONS {
         *(.bss)
     }
 	_InfernoEnd = .;
+
+    /DISCARD/ : {
+        *(.eh_frame)
+        *(.comment)
+    }
 }

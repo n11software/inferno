@@ -49,6 +49,7 @@ namespace CPU {
 		prInfo("cpu", "CPU0: Origin=%s  Id=0x%x  Family=0x%x  Model=0x%x  Stepping=%d", VendorID(), id, family, model, stepping);
 		prInfo("cpu", "CPU0: %s", (char *)brand);
 
-		return (char *)brand;
+		memcpy(CPUModel, brand, sizeof(brand));
+		return CPUModel;
 	}
 }
