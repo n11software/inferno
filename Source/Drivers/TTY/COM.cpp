@@ -20,8 +20,10 @@ bool COM1Active = false;
 Framebuffer* COM1Framebuffer;
 Window COM1Window;
 void* font_;
+bool gui_;
 
-void setFramebuffer(Framebuffer* fb) {
+void setFramebuffer(Framebuffer* fb, bool gui) {
+	gui_ = gui;
 	COM1Framebuffer = fb;
 }
 

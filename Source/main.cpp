@@ -42,7 +42,7 @@ Paging* paging;
 __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	// Initialize TTY
 	setFont(bob->FontFile);
-	setFramebuffer(bob->framebuffer);
+	setFramebuffer(bob->framebuffer, false);
 	prInfo("kernel", "Inferno kernel version 0.1alpha");
 	kprintf("Copyright 2021-2024 N11 Software.\nCopyright 2018-2021 Ariston Lorenzo and Levi Hicks. All rights reserved.\nSee COPYRIGHT in the Inferno source tree for more information.\n");
 
@@ -62,68 +62,6 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	Interrupts::CreateISR(0x80, (void*)SyscallHandler);
 	Interrupts::CreateISR(0x0E, (void*)PageFault);
 	Interrupts::CreateISR(0x08, (void*)DoublePageFault);
-
-	uint64_t bitmap[128] = {0};
-
-	kprintf("Init Memory\n");
-	Memory::Init(bob);
-	kprintf("Done\n");
-	unsigned long long TM = Memory::GetSize();
-	_InfernoStart = (unsigned long long)bob->KernelAddress;
-	_InfernoEnd = (unsigned long long)bob->KernelSize;
-	kprintf("InfernoStart: %x\n", &_InfernoStart);
-	kprintf("InfernoEnd: %x\n", _InfernoEnd);
-
-	pmm = PhysicalMemoryManager(bitmap, TM);
-	pmm.lock_addresses(&_InfernoStart, (uint64_t)&_InfernoEnd-(uint64_t)&_InfernoStart*4096);
-	paging = &Paging(pmm);
-	paging->map_page((uint64_t)paging->pml4, (uint64_t)paging->pml4);
-	paging->map_page((uint64_t)paging->pdpt, (uint64_t)paging->pdpt);
-	paging->map_page((uint64_t)paging->pd, (uint64_t)paging->pd);
-	paging->map_page((uint64_t)paging->pt, (uint64_t)paging->pt);
-	uint64_t kernel_start = (uint64_t)bob->KernelAddress;
-	uint64_t kernel_end = kernel_start + bob->KernelSize *4096;
-	for (uint64_t addr = kernel_start; addr < kernel_end; addr += PAGE_SIZE) {
-		paging->map_page(addr, addr);
-	}
-
-	// map fb
-	{uint64_t fb_addr = (unsigned long long)bob->framebuffer->Address;
-	uint64_t fb_size = bob->framebuffer->Width*bob->framebuffer->Height*4;
-	for (uint64_t addr = fb_addr; addr < fb_addr + fb_size; addr += PAGE_SIZE) {
-		paging->map_page(addr, addr);
-	}
-	pmm.lock_addresses((void*)fb_addr, fb_size/4096);}
-	{uint64_t fb_addr = (unsigned long long)0x100000;
-	uint64_t fb_size = bob->framebuffer->Width*bob->framebuffer->Height*4;
-	for (uint64_t addr = fb_addr; addr < fb_addr + fb_size; addr += PAGE_SIZE) {
-		paging->map_page(addr, addr);
-	}
-	pmm.lock_addresses((void*)fb_addr, fb_size/4096);}
-	{uint64_t fb_addr = (unsigned long long)0x300000;
-	uint64_t fb_size = bob->framebuffer->Width*bob->framebuffer->Height*4;
-	for (uint64_t addr = fb_addr; addr < fb_addr + fb_size; addr += PAGE_SIZE) {
-		paging->map_page(addr, addr);
-	}
-	pmm.lock_addresses((void*)fb_addr, fb_size/4096);}
-
-	for (unsigned long long i=0;i<bob->MapSize/bob->DescriptorSize; i++) {
-		MemoryDescriptor* descriptor = (MemoryDescriptor*)((unsigned long long)bob->MemoryMap + (i * bob->DescriptorSize));
-		if (descriptor->Type != 7) {
-			pmm.lock_addresses(descriptor->PhysicalStart, descriptor->NumberOfPages);
-			// Map pages
-			for (unsigned long long j = (uint64_t)descriptor->PhysicalStart; j < (uint64_t)descriptor->PhysicalStart + (uint64_t)descriptor->NumberOfPages * PAGE_SIZE; j += PAGE_SIZE) {
-				paging->map_page(j, j);
-			}
-		}
-	}
-	kprintf("Enabling PageTable\n");
-	// paging->enable_paging();
-	kprintf("Loading PageTable\n");
-	// paging->load_paging();
-	// InitializeHeap((void*)0xf000, 0x10);
-	kprintf("Free: %m\n", Free);
-	kprintf("Used: %m\n", Used);
 
 	// Load APIC
 	if (APIC::Capable()) {
@@ -148,24 +86,23 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 		LoadGDT(&descriptor);
 		prInfo("kernel", "initalized GDT");
 	#endif
+}
+
+__attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
+	unsigned long long timeNow = RTC::getEpochTime();
+	SetFramebuffer(bob->framebuffer);
+	SetFont(bob->FontFile);
+	Inferno(bob);
+	unsigned long long render = timeNow-RTC::getEpochTime();
+	// Once finished say hello and halt
+	prInfo("kernel", "Done!");
+	prInfo("kernel", "Boot time: %ds", render);
 
 
 	unsigned long res = 0;
 	asm volatile("int $0x80" : "=a"(res) : "a"(1), 
 		"d"((unsigned long)"Hello from syscall\n\r"), 
 		"D"((unsigned long)0) : "rcx", "r11", "memory");
-}
-
-__attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
-	SetFramebuffer(bob->framebuffer);
-	SetFont(bob->FontFile);
-	Inferno(bob);
-	unsigned long long timeNow = RTC::getEpochTime();
-	unsigned long long render = RTC::getEpochTime()-timeNow;
-	prInfo("kernel", "Render time: %ds", render);
-
-	// Once finished say hello and halt
-	prInfo("kernel", "Done!");
 
 	while (true) asm("hlt");
 }
