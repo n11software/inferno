@@ -35,6 +35,9 @@ void prInfo(const char* subsystem, const char* message, ...) {
 			case 'M' :
 				kprintf("%M", va_arg(args, char*));
 				break;
+			case 'x' :
+				kprintf("%x", va_arg(args, char*));
+				break;
 			}
 		} else {
 			kputchar(*p);

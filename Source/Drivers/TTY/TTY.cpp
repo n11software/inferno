@@ -41,13 +41,8 @@ Window::Window(int x, int y, int width, int height) {
 	this->Height = height;
 	
 	// Allocate buffers at fixed addresses with proper size
-	WindowBuffer = (uint8_t*)0x300000;
-	buffer = (uint8_t*)0x100000;
-	
-	// Initialize the buffer with background color
-	for(int i = 0; i < Width * Height * 4; i++) {
-		WindowBuffer[i] = 0xFF;  // Set to white
-	}
+	WindowBuffer = (uint8_t*)fb->Address + (4*fb->PPSL*y+4*x);
+	buffer = (uint8_t*) WindowBuffer + 4*fb->PPSL*Height+4*Width;
 }
 void Window::Close() {
 	DrawRectangle(0, 0, Width, Height, 0);

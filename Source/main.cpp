@@ -24,6 +24,9 @@
 #include <CPU/CPUID.h>
 #include <Inferno/Log.h>
 #include <Drivers/TTY/TTY.h>
+#include <Memory/Memory.hpp>  // Add this include
+#include <Memory/Paging.hpp>
+#include <Memory/Heap.hpp>
 
 // Drivers
 #include <Drivers/RTC/RTC.h>
@@ -31,6 +34,11 @@
 
 extern unsigned long long _InfernoEnd;
 extern unsigned long long _InfernoStart;
+
+extern "C" {
+    void* malloc(size_t);
+    void free(void*);
+}
 
 __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	// Initialize TTY
@@ -45,6 +53,51 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	// CPU
 	CPU::CPUDetect();
 
+	// Memory initialization
+    uint64_t kernelStart = (uint64_t)&_InfernoStart;
+    uint64_t kernelEnd = (uint64_t)&_InfernoEnd;
+    uint64_t kernelSize = kernelEnd - kernelStart;
+    
+    // Calculate physical and virtual addresses
+    uint64_t kernelPhysStart = 0x100000;  // Load kernel at 1MB physical
+    uint64_t kernelVirtStart = 0xFFFFFFFF80000000;  // Higher half
+
+    prInfo("kernel", "kernel physical: 0x%x - 0x%x", kernelPhysStart, kernelPhysStart + kernelSize);
+    prInfo("kernel", "kernel virtual: 0x%x - 0x%x", kernelVirtStart, kernelVirtStart + kernelSize);
+    
+    Memory::Initialize(nullptr, 2 * 1024 * 1024);
+    Paging::Initialize();
+    
+	// 
+    // Initialize heap at 4MB with 1MB size initially
+    Heap::Initialize(0x4000000, 0x100000);
+    
+    // Test heap allocator
+    prInfo("kernel", "Testing heap allocator...");
+    
+    // Test 1: Basic allocation
+    void* block1 = Heap::Allocate(1024);
+    void* block2 = Heap::Allocate(2048);
+    void* block3 = Heap::Allocate(4096);
+    
+    prInfo("heap", "Allocated blocks at: 0x%x, 0x%x, 0x%x", 
+           (uint64_t)block1, (uint64_t)block2, (uint64_t)block3);
+
+    // Test 2: Free and reallocate
+    Heap::Free(block2);  // Free middle block
+    void* block4 = Heap::Allocate(1024);  // Should reuse part of freed space
+    prInfo("heap", "Reallocated block at: 0x%x", (uint64_t)block4);
+
+    // Test 3: Merge blocks
+    Heap::Free(block1);
+    Heap::Free(block4);  // Should merge with block1's space
+    void* block5 = Heap::Allocate(2048);  // Should use merged space
+    prInfo("heap", "Merged allocation at: 0x%x", (uint64_t)block5);
+
+    if (!Paging::IsEnabled()) {
+        prErr("kernel", "Failed to enable paging");
+        while(1) asm("hlt");
+    }
 
 	// Create IDT
 	Interrupts::CreateIDT();
@@ -92,12 +145,31 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
 	prInfo("kernel", "Done!");
 	prInfo("kernel", "Boot time: %ds", render);
 
-	// while (1) {
-	// 	unsigned long res = 0;
-	// 	asm volatile("int $0x80" : "=a"(res) : "a"(1), 
-	// 		"d"((unsigned long)"Hello from syscall\n\r"), 
-	// 		"D"((unsigned long)0) : "rcx", "r11", "memory");
-	// }
+	// test malloc
+	void* ptr = malloc(40000);
+	prInfo("kernel", "malloc: 0x%x", (uint64_t)ptr);
+	free(ptr);
+
+	void *ptr2 = malloc(40000);
+	prInfo("kernel", "malloc: 0x%x", (uint64_t)ptr2);
+	free(ptr2);
+
+	// Test syscall malloc with properly preserved registers
+    uint64_t ptr_addr;
+    asm volatile(
+        "push %%rdi\n"        // Save registers we'll use
+        "push %%rax\n"
+        "movq $1024, %%rdi\n" // Size argument
+        "movq $2, %%rax\n"    // SYS_MALLOC
+        "int $0x80\n"         // Do syscall
+        "movq %%rax, %0\n"    // Save result before restoring
+        "pop %%rax\n"         // Restore registers
+        "pop %%rdi"
+        : "=m"(ptr_addr)      // Output to memory to avoid register constraints
+        :: "memory"
+    );
+    
+    prInfo("kernel", "syscall malloc returned: 0x%x", ptr_addr);
 
 	while (true) asm("hlt");
 }
