@@ -12,6 +12,7 @@
 #include <Drivers/TTY/COM.h>
 #include <Drivers/Graphics/Framebuffer.h>
 #include <Drivers/TTY/TTY.h>
+#include <Drivers/TTY/VGA_Font.h>  // Add this include
 #include <Memory/Mem_.hpp>
 
 #include <Inferno/Log.h>
@@ -134,9 +135,19 @@ void InitializeSerialDevice() {
     outb(0x3f8 + 4, 0x0F);
     COM1Active = true;
     prInfo("kernel", "serial device initalized");
-	if (COM1Framebuffer != nullptr) {
-		prInfo("kernel", "serial framebuffer initialized");
-	} else return;
+
+    if (!gui_) {
+        // Clear entire framebuffer to black
+        uint32_t* fb_addr = (uint32_t*)COM1Framebuffer->Address;
+        for (int i = 0; i < COM1Framebuffer->Width * COM1Framebuffer->Height; i++) {
+            fb_addr[i] = 0;  // Black background
+        }
+        return;
+    }
+
+    if (COM1Framebuffer != nullptr) {
+        prInfo("kernel", "serial framebuffer initialized");
+    } else return;
 	if (font_ != nullptr) {
 		prInfo("kernel", "serial font initialized");
 	} else return;
@@ -164,6 +175,14 @@ void InitializeSerialDevice() {
 	window.Swap();
 	swapBuffers();
     clearConsoleBuffer();
+
+    if (gui_) {
+        window.DrawRectircle(0, 0, width, height, 7, 0xFFFFFF);  // White background
+        window.DrawRectircle(8, 14+16, width-16, height-8-14-16, 7, 0xF4F4F4);  // Light gray console area
+        window.drawString("Inferno", 8+((width-16)/2)-30, 9, 0x000000, 2, true);
+        window.Swap();
+        swapBuffers();
+    }
 }
 
 int SerialRecieveEvent() { return inb(0x3f8 + 5) & 1; }
@@ -179,10 +198,90 @@ char* ConsoleOutput;
 int consoleX = 5;
 int consoleY = 5;
 
+// Add these variables for non-GUI mode
+int screen_x = 0;
+int screen_y = 0;
+
+void directPutchar(char c) {
+    const int CHAR_WIDTH = 8;
+    const int CHAR_HEIGHT = 12;
+    const int MAX_X = COM1Framebuffer->Width - CHAR_WIDTH;
+    const int MAX_Y = COM1Framebuffer->Height - CHAR_HEIGHT;
+
+    if (c == '\n') {
+        screen_x = 0;
+        screen_y += CHAR_HEIGHT;
+        if (screen_y >= MAX_Y) {
+            // Scroll the screen up by copying lines
+            uint32_t* fb_addr = (uint32_t*)COM1Framebuffer->Address;
+            int line_width = COM1Framebuffer->PPSL;
+            
+            // Copy each line up
+            for (int y = CHAR_HEIGHT; y < COM1Framebuffer->Height; y++) {
+                for (int x = 0; x < COM1Framebuffer->Width; x++) {
+                    fb_addr[(y - CHAR_HEIGHT) * line_width + x] = fb_addr[y * line_width + x];
+                }
+            }
+            
+            // Clear the new line
+            for (int y = MAX_Y; y < COM1Framebuffer->Height; y++) {
+                for (int x = 0; x < COM1Framebuffer->Width; x++) {
+                    fb_addr[y * line_width + x] = 0;
+                }
+            }
+            
+            screen_y = MAX_Y - CHAR_HEIGHT;
+        }
+        return;
+    }
+
+    // Draw character
+    uint8_t* fb_addr = (uint8_t*)COM1Framebuffer->Address;
+    uint8_t idx = ASCII_TO_FONT(c);
+
+	if (c == '\r') {
+		screen_x = 0;
+		return;
+	}
+    
+    for (int row = 0; row < 8; row++) {
+        uint8_t line = font8x8[idx][row];
+        for (int col = 0; col < 8; col++) {
+            if (line & (1 << (7 - col))) {
+                int x = screen_x + col;
+                int y = screen_y + row;
+                if (x < COM1Framebuffer->Width && y < COM1Framebuffer->Height) {
+                    uint32_t* pixel = (uint32_t*)(fb_addr + (y * COM1Framebuffer->PPSL * 4) + (x * 4));
+                    *pixel = 0xFFFFFFFF;  // White text
+                }
+            }
+        }
+    }
+    
+    screen_x += CHAR_WIDTH;
+    if (screen_x >= MAX_X) {
+        screen_x = 0;
+        screen_y += CHAR_HEIGHT;
+        if (screen_y >= MAX_Y) {
+            screen_y = 0;  // Wrap to top if we run out of scroll space
+        }
+    }
+}
+
 void kputchar(char a) {
     if (!COM1Active) return;
     while (SerialWait() == 0);
     outb(0x3f8, a);
+
+    if (!gui_) {
+        if (COM1Framebuffer != nullptr) {
+            directPutchar(a);
+        }
+        return;
+    }
+
+    // Use black text for GUI mode
+    const unsigned int text_color = gui_ ? 0x000000 : 0xFFFFFF;
 
     if (a == '\n') {
         // Terminate current line
@@ -190,7 +289,7 @@ void kputchar(char a) {
         
         // Clear and draw the completed line
         window.DrawRectircle(8, 37 + (currentRow * LINE_HEIGHT), width-26, LINE_HEIGHT, 7, 0xf4f4f4);
-        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), 0x000000, 1);
+        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), text_color, 1);
         
         currentRow++;
         currentCol = 0;
@@ -210,7 +309,7 @@ void kputchar(char a) {
             
             // Draw the completed line
             window.DrawRectircle(8, 37 + (currentRow * LINE_HEIGHT), width-26, LINE_HEIGHT, 7, 0xf4f4f4);
-            window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), 0x000000, 1);
+            window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), text_color, 1);
             
             currentRow++;
             currentCol = 0;
@@ -226,6 +325,10 @@ void kputchar(char a) {
             // Just store the character without drawing
             consoleBuffer[currentRow][currentCol++] = a;
         }
+    }
+
+    if (gui_) {
+        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), 0x000000, 1);
     }
 }
 

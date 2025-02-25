@@ -40,13 +40,11 @@ Window::Window(int x, int y, int width, int height) {
 	this->y = y;
 	this->Width = width;
 	this->Height = height;
-	WindowBuffer = (uint8_t*)0x300000; // TODO: make this dynamic
-	// for now just create a buffer after the framebuffer
-	WindowBuffer = (uint8_t*)((uint64_t)fb->Address + fb->Width * fb->Height * 4);
-	buffer = (uint8_t*)0x100000;
-	// for now just create a buffer after the WindowBuffer
-	buffer = (uint8_t*)((uint64_t)WindowBuffer + fb->Width * fb->Height * 4);
-	memcpy(WindowBuffer, buffer+(4*fb->PPSL*y+4), 4*fb->PPSL*height+4*width);
+	
+	// create a buffer right after framebuffer (remember we don't have malloc)
+	WindowBuffer = (uint8_t*)fb->Address + fb->Width * fb->Height * 4;
+	buffer = (uint8_t*)WindowBuffer + fb->Width * fb->Height * 4;
+	memcpy(WindowBuffer, buffer+(4*fb->PPSL*y+4), fb->Height + fb->Width * 4);
 }
 void Window::Close() {
 	DrawRectangle(0, 0, Width, Height, 0);
