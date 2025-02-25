@@ -10,6 +10,9 @@
 #include <Inferno/IO.h>
 #include <Drivers/Graphics/Framebuffer.h>
 
+void setFramebuffer(Framebuffer* fb);
+void setFont(void* font);
+
 void InitializeSerialDevice();
 char AwaitSerialResponse();
 void kputchar(char a);

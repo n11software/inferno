@@ -10,10 +10,113 @@
 #include <Inferno/stdint.h>
 #include <Inferno/IO.h>
 #include <Drivers/TTY/COM.h>
+#include <Drivers/Graphics/Framebuffer.h>
+#include <Drivers/TTY/TTY.h>
+#include <Memory/Mem_.hpp>
 
 #include <Inferno/Log.h>
 
 bool COM1Active = false;
+Framebuffer* COM1Framebuffer;
+Window COM1Window;
+void* font_;
+
+void setFramebuffer(Framebuffer* fb) {
+	COM1Framebuffer = fb;
+}
+
+void setFont(void* f) {
+	font_ = f;
+}
+
+Window window;
+int width = 400;
+int height = 300;
+int x,y;
+
+char *strcpy(char* dest, const char* src) {
+	if (dest == nullptr) {
+		return nullptr;
+	}
+
+	char *ptr = dest;
+
+	while (*src != '\0') {
+		*dest = *src;
+		dest++;
+		src++;
+	}
+
+	*dest = '\0';
+
+	return ptr;
+}
+
+#define LINE_HEIGHT 12
+#define CONSOLE_COLS 41  // (400 - 26) / 8 to stay within width-26
+#define CONSOLE_ROWS 21  // (300 - 48) / LINE_HEIGHT to stay within height-8-14-26
+char consoleBuffer[CONSOLE_ROWS][CONSOLE_COLS + 1];  // +1 for null terminator
+int currentRow = 0;
+int currentCol = 0;
+
+void clearConsoleBuffer() {
+    for(int i = 0; i < CONSOLE_ROWS; i++) {
+        for(int j = 0; j < CONSOLE_COLS; j++) {
+            consoleBuffer[i][j] = ' ';
+        }
+        consoleBuffer[i][CONSOLE_COLS] = '\0';  // Null terminate each line
+    }
+    currentRow = 0;
+    currentCol = 0;
+    // Clear entire console area
+    window.DrawRectircle(8, 37, width-26, height-8-14-26, 7, 0xf4f4f4);
+    window.Swap();
+    swapBuffers();
+}
+
+void redrawCurrentLine() {
+    // Clear the entire line area including margins
+    int y = 37 + (currentRow * LINE_HEIGHT);
+    window.DrawRectircle(8, y, width-26, LINE_HEIGHT, 7, 0xf4f4f4);
+    
+    // Ensure null termination
+    consoleBuffer[currentRow][currentCol] = '\0';
+    
+    // Only draw if there's content
+    if(currentCol > 0) {
+        window.drawString(consoleBuffer[currentRow], 15, y, 0x000000, 1);
+    }
+    
+    window.Swap();
+    swapBuffers();
+}
+
+void redrawFromLine(int startRow) {
+    // Clear entire console area first
+    window.DrawRectircle(8, 37 + (startRow * LINE_HEIGHT), width-26, height-8-14-26-(startRow * LINE_HEIGHT), 7, 0xf4f4f4);
+    
+    // Draw each line as a string
+    for(int i = startRow; i <= currentRow; i++) {
+        if(consoleBuffer[i][0] != '\0' && consoleBuffer[i][0] != ' ') {
+            window.drawString(consoleBuffer[i], 15, 37 + (i * LINE_HEIGHT), 0x000000, 1);
+        }
+    }
+    window.Swap();
+    swapBuffers();
+}
+
+void scrollBuffer() {
+    // Move all lines up by one
+    for(int i = 0; i < CONSOLE_ROWS - 1; i++) {
+        strcpy(consoleBuffer[i], consoleBuffer[i + 1]);
+    }
+    // Clear the last line
+    for(int j = 0; j < CONSOLE_COLS; j++) {
+        consoleBuffer[CONSOLE_ROWS - 1][j] = ' ';
+    }
+    consoleBuffer[CONSOLE_ROWS - 1][CONSOLE_COLS] = '\0';
+    redrawFromLine(0);
+}
 
 void InitializeSerialDevice() {
     outb(0x3f8 + 1, 0x00);
@@ -29,6 +132,36 @@ void InitializeSerialDevice() {
     outb(0x3f8 + 4, 0x0F);
     COM1Active = true;
     prInfo("kernel", "serial device initalized");
+	if (COM1Framebuffer != nullptr) {
+		prInfo("kernel", "serial framebuffer initialized");
+	} else return;
+	if (font_ != nullptr) {
+		prInfo("kernel", "serial font initialized");
+	} else return;
+	// Make window
+	SetFont(font_);
+	SetFramebuffer(COM1Framebuffer);
+	// create window
+    x = (COM1Framebuffer->Width - width) / 2;
+    y = (COM1Framebuffer->Height - height) / 2;
+	window = Window(x, y, width, height);
+	SetFramebuffer(COM1Framebuffer);
+	prInfo("tty", "initialized TTY");
+	void* backBuffer = (void*)0x100000;
+    memset(backBuffer, 0x42, COM1Framebuffer->Width * COM1Framebuffer->Height * 4);
+
+	window.DrawRectircle(0, 0, width, height, 7, 0xffffff);
+    window.DrawFilledCircle(14, 14, 6, 0xff0000);
+    window.DrawFilledCircle(14+16, 14, 6, 0x00f000);
+    window.DrawFilledCircle(14+16+16, 14, 6, 0xffd629);
+
+    window.DrawRectircle(8, 14+16, width-16, height-8-14-16, 7, 0xf4f4f4);
+	// add title
+	window.drawString("Inferno", 8+((width-16)/2)-30, 9, 0x000000, 2, true);
+	
+	window.Swap();
+	swapBuffers();
+    clearConsoleBuffer();
 }
 
 int SerialRecieveEvent() { return inb(0x3f8 + 5) & 1; }
@@ -40,10 +173,58 @@ char AwaitSerialResponse() {
 
 int SerialWait() { return inb(0x3f8 + 5) & 0x20; }
 
+char* ConsoleOutput;
+int consoleX = 5;
+int consoleY = 5;
+
 void kputchar(char a) {
     if (!COM1Active) return;
     while (SerialWait() == 0);
     outb(0x3f8, a);
+
+    if (a == '\n') {
+        // Terminate current line
+        consoleBuffer[currentRow][currentCol] = '\0';
+        
+        // Clear and draw the completed line
+        window.DrawRectircle(8, 37 + (currentRow * LINE_HEIGHT), width-26, LINE_HEIGHT, 7, 0xf4f4f4);
+        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), 0x000000, 1);
+        
+        currentRow++;
+        currentCol = 0;
+        
+        if(currentRow >= CONSOLE_ROWS) {
+            scrollBuffer();
+            currentRow = CONSOLE_ROWS - 1;
+        }
+        
+        window.Swap();
+        swapBuffers();
+    } else {
+        if(currentCol >= CONSOLE_COLS-1) {
+            // Line wrap
+            consoleBuffer[currentRow][currentCol] = a;
+            consoleBuffer[currentRow][CONSOLE_COLS] = '\0';
+            
+            // Draw the completed line
+            window.DrawRectircle(8, 37 + (currentRow * LINE_HEIGHT), width-26, LINE_HEIGHT, 7, 0xf4f4f4);
+            window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), 0x000000, 1);
+            
+            currentRow++;
+            currentCol = 0;
+            
+            if(currentRow >= CONSOLE_ROWS) {
+                scrollBuffer();
+                currentRow = CONSOLE_ROWS - 1;
+            }
+            
+            window.Swap();
+            swapBuffers();
+        } else {
+            // Just store the character without drawing
+            consoleBuffer[currentRow][currentCol++] = a;
+        }
+    }
 }
 
 char* strchr(const char* str, int c) {
@@ -85,24 +266,6 @@ int strlen(const char* str) {
     }
 }
 
-char *strcpy(char* dest, const char* src) {
-	if (dest == nullptr) {
-		return nullptr;
-	}
-
-	char *ptr = dest;
-
-	while (*src != '\0') {
-		*dest = *src;
-		dest++;
-		src++;
-	}
-
-	*dest = '\0';
-
-	return ptr;
-}
-
 struct PrintData {
     bool is_format = false, alt = false, right = false;
     int size = 0, spacing = 0, sign = 0, base = 0, baseprefix = 0, printedchrs = 0;
@@ -133,6 +296,7 @@ void _reset(PrintData* pd) {
 
 void _print(PrintData* pd, const char* str) {
     for (int i = 0; str[i] != 0; i++) kputchar(str[i]);
+
     pd->printedchrs += strlen(str);
 }
 
