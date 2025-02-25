@@ -21,9 +21,6 @@
 #include <Interrupts/PageFault.hpp>
 #include <Interrupts/Syscall.hpp>
 #include <Memory/Mem_.hpp>
-#include <Memory/Memory.hpp>
-#include <Memory/Paging.h>
-#include <Memory/Heap.h>
 #include <CPU/CPUID.h>
 #include <Inferno/Log.h>
 #include <Drivers/TTY/TTY.h>
@@ -34,10 +31,6 @@
 
 extern unsigned long long _InfernoEnd;
 extern unsigned long long _InfernoStart;
-
-extern unsigned long long Free, Used;
-PhysicalMemoryManager pmm;
-Paging* paging;
 
 __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	// Initialize TTY
