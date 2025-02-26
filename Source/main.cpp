@@ -29,6 +29,7 @@
 #include <Memory/Heap.hpp>
 
 // Drivers
+#include <Drivers/ACPI/acpi.h>
 #include <Drivers/RTC/RTC.h>
 #include <Drivers/PCI/PCI.h>
 
@@ -98,6 +99,8 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
         prErr("kernel", "Failed to enable paging");
         while(1) asm("hlt");
     }
+
+	ACPI::init();
 
 	// Create IDT
 	Interrupts::CreateIDT();
@@ -170,6 +173,15 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
     );
     
     prInfo("kernel", "syscall malloc returned: 0x%x", ptr_addr);
+
+	const char* str1 = "Hello, World!";
+	const char* str2 = "Hello, World!";
+	const char* str3 = "Hello, Inferno!";
+
+	int result1 = memcmp(str1, str2, 13);
+	int result2 = memcmp(str1, str3, 13);
+	prInfo("kernel", "memcmp result1: %d", result1);
+	prInfo("kernel", "memcmp result2: %d", result2);
 
 	while (true) asm("hlt");
 }

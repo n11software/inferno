@@ -1,4 +1,7 @@
 #include <Memory/Mem_.hpp>
+
+#include <Inferno/stdint.h>
+#include <Inferno/types.h>
 // Stolen from:
 // https://github.com/SerenityOS/serenity/
 //
@@ -52,4 +55,16 @@ void* memcpy(void* destptr, void const* srcptr, unsigned long int size) {
         if (size == 0) return destptr;
     }
     return destptr;
+}
+
+int memcmp(const void* ptr1, const void* ptr2, size_t num) {
+    const uint8_t* p1 = (const uint8_t*)ptr1;
+    const uint8_t* p2 = (const uint8_t*)ptr2;
+
+	for (size_t i = 0; i < num; i++) {
+		if (p1[i] != p2[i]) {
+			return p1[i] - p2[i];
+		}
+	}
+	return 0;
 }
