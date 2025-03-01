@@ -43,17 +43,17 @@ uint8_t readStatus(void) {
 char* readStatusStr(void) {
 	uint8_t status = readStatus();
 	if (status & ATA_STATUS_BSY) {
-		return "BUSY";
+		return (char*)"BUSY";
 	} else if (status & ATA_STATUS_DRDY) {
-		return "READY";
+		return (char*)"READY";
 	} else if (status & ATA_STATUS_DRQ) {
-		return "DATA REQUEST";
+		return (char*)"DATA REQUEST";
 	} else if (status & ATA_STATUS_ERR) {
-		return "ERROR";
+		return (char*)"ERROR";
 	} else if (status & ATA_STATUS_DF) {
-		return "DEV FAULT";
+		return (char*)"DEV FAULT";
 	} else {
-		return "UNK";
+		return (char*)"UNK";
 	}
 }
 
@@ -169,19 +169,19 @@ void setupDriveReadWrite(uint8_t dev, uint32_t lba, uint8_t sectorCnt) {
 // TODO: implement read/write sectors
 
 char* getDevModelNum(AtaIDDeviceData *devInfo) {
-	char *model = devInfo->ModelNumber;
+	char *model = (char*)devInfo->ModelNumber;
 	model[39] = '\0';
 	return model;
 }
 
 char* getDevSerialNum(AtaIDDeviceData *devInfo) {
-	char* serial = devInfo->SerialNumber;
+	char* serial = (char*)devInfo->SerialNumber;
 	serial[19] = '\0';
 	return serial;
 }
 
 char* getDevFirmwareRev(AtaIDDeviceData *devInfo) {
-	char *firmware = devInfo->FirmwareRevision;
+	char *firmware = (char*)devInfo->FirmwareRevision;
 	firmware[7] = '\0';
 	return firmware;
 }

@@ -10,6 +10,10 @@ SECTIONS {
         *(COMMON)
         *(.bss)
     }
+    /* Add section for identity-mapped code */
+    .identtext ALIGN(4K) : {
+        *(.identtext)
+    }
 	_InfernoEnd = .;
 
     /DISCARD/ : {
