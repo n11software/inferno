@@ -31,6 +31,8 @@
 
 #pragma once
 
+#include <Inferno/types.h>
+
 unsigned char inb(unsigned short port);
 unsigned char inb_p(unsigned short port);
 unsigned short inw(unsigned short port);
@@ -59,4 +61,3 @@ void outsl(unsigned short port, const void* addr,
 	unsigned long count);
 
 void io_wait();
-

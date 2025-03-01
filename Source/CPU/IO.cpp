@@ -28,6 +28,16 @@ unsigned int inl(unsigned short port) {
 	return returnVal;
 }
 
+void outw(unsigned short port, unsigned short value) {
+	asm volatile("outw %0, %1" :: "a"(value), "Nd"(port));
+}
+
+unsigned short inw(unsigned short port) {
+	unsigned short returnVal;
+	asm volatile("inw %1, %0" : "=a"(returnVal) : "Nd"(port));
+	return returnVal;
+}
+
 void io_wait() {
 	asm volatile("outb %%al, $0x80" ::"a"(0));
 }

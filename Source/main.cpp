@@ -370,6 +370,18 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
         prErr("kernel", "Virtual memory aliasing test FAILED");
     }
     
-    // Enter main kernel loop
+    // Initialize ACPI and perform shutdown
+    prInfo("kernel", "Initializing ACPI for system shutdown...");
+    if (ACPI::init(bob->RSDP)) {
+        prInfo("kernel", "ACPI initialized, shutting down system...");
+        ACPI::shutdown();
+        
+        // If shutdown fails, fall back to halt loop
+        prErr("kernel", "ACPI shutdown failed, halting CPU");
+    } else {
+        prErr("kernel", "ACPI initialization failed, halting CPU");
+    }
+    
+    // Fall back to halt loop if ACPI shutdown fails
     while (true) asm("hlt");
 }
