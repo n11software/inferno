@@ -7,3 +7,6 @@
 /* QEMU */
 #define PCI_DEVICE_ID_QEMU_VIRTUAL_VGA 0x1111 /* QEMU Virtual VGA */
 #define PCI_DEVICE_ID_QEMU_NVME_CONTROLLER 0x0010 /* QEMU NVMe Controller */
+
+/* SK hynix */
+#define PCI_DEVICE_ID_SK_HYNIX_PC601_NVME /* SK hynix PC601 NVMe Solid State Drive */
