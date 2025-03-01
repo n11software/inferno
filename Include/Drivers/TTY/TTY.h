@@ -2,6 +2,14 @@
 #include <Drivers/Graphics/Framebuffer.h>
 #include <Inferno/stdint.h>
 
+// Define AnsiState enum once
+enum AnsiState {
+    NORMAL,
+    ESC_SEEN,
+    BRACKET_SEEN,
+    PARSING_NUMBER
+};
+
 // Direct framebuffer functions
 void InitializeScreen(Framebuffer* _fb);
 void fbDrawPixel(int x, int y, uint32_t color);
@@ -11,6 +19,10 @@ void fbPrintChar(char c, uint32_t color = 0xFFFFFFFF, int scale = 1);
 void fbPrintString(const char* str, uint32_t color = 0xFFFFFFFF, int scale = 1);
 void fbClearScreen();
 void fbSetCursor(int x, int y);
+
+// ANSI handling functions
+void processAnsiCode(int code);
+void resetTerminalAttributes();
 
 // Existing functions
 void SetFramebuffer(Framebuffer* _fb);
@@ -22,6 +34,12 @@ extern int fb_cursor_x;
 extern int fb_cursor_y;
 extern Framebuffer* fb;
 extern void* font;
+
+// External variables
+extern uint32_t current_color;
+extern AnsiState ansi_state;
+extern int ansi_code;
+extern const uint32_t ansi_colors[];
 
 // Macro for ASCII to font index conversion
 #ifndef ASCII_TO_FONT

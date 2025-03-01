@@ -12,6 +12,41 @@ int fb_cursor_y = 0;
 Framebuffer* fb;
 void* font;
 
+// Current color - default to white
+uint32_t current_color = 0xFFFFFFFF;
+
+// ANSI escape sequence state variables
+AnsiState ansi_state = NORMAL;
+int ansi_code = 0;
+
+// ANSI color mapping
+const uint32_t ansi_colors[] = {
+    0xFF000000, // Black (30)
+    0xFFFF0000, // Red (31)
+    0xFF00FF00, // Green (32)
+    0xFFFFFF00, // Yellow (33)
+    0xFF0000FF, // Blue (34)
+    0xFFFF00FF, // Magenta (35)
+    0xFF00FFFF, // Cyan (36)
+    0xFFFFFFFF  // White (37)
+};
+
+// Reset terminal attributes
+void resetTerminalAttributes() {
+    current_color = 0xFFFFFFFF; // Reset to white
+}
+
+// Process ANSI escape sequence
+void processAnsiCode(int code) {
+    if (code >= 30 && code <= 37) {
+        // Set text color
+        current_color = ansi_colors[code - 30];
+    } else if (code == 0) {
+        // Reset all attributes
+        resetTerminalAttributes();
+    }
+}
+
 // Initialize the screen
 void InitializeScreen(Framebuffer* _fb) {
     fb = _fb;
@@ -107,6 +142,35 @@ void fbScrollScreen(int scale) {
 void fbPrintChar(char c, uint32_t color, int scale) {
     if (!fb) return;
     
+    // Handle ANSI escape sequences
+    if (ansi_state == NORMAL) {
+        if (c == '\033') {
+            ansi_state = ESC_SEEN;
+            return;
+        }
+    } else if (ansi_state == ESC_SEEN) {
+        if (c == '[') {
+            ansi_state = BRACKET_SEEN;
+            ansi_code = 0;
+            return;
+        } else {
+            ansi_state = NORMAL;
+        }
+    } else if (ansi_state == BRACKET_SEEN || ansi_state == PARSING_NUMBER) {
+        if (c >= '0' && c <= '9') {
+            ansi_code = (ansi_code * 10) + (c - '0');
+            ansi_state = PARSING_NUMBER;
+            return;
+        } else if (c == 'm') {
+            processAnsiCode(ansi_code);
+            ansi_state = NORMAL;
+            return;
+        } else {
+            ansi_state = NORMAL;
+        }
+    }
+    
+    // Process regular character
     int char_width = 8 * scale + 1;  // Character width plus spacing
     int char_height = 8 * scale + 1; // Character height plus spacing
     
@@ -147,7 +211,9 @@ void fbPrintChar(char c, uint32_t color, int scale) {
         }
         
         // Draw the character directly to framebuffer
-        fbDrawChar(c, fb_cursor_x, fb_cursor_y, color, scale);
+        // Use the current color if no specific color is provided
+        uint32_t draw_color = (color == 0xFFFFFFFF) ? current_color : color;
+        fbDrawChar(c, fb_cursor_x, fb_cursor_y, draw_color, scale);
         fb_cursor_x += char_width;
     }
 }
