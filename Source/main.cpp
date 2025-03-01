@@ -99,8 +99,6 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
         while(1) asm("hlt");
     }
 
-	ACPI::init();
-
 	// Create IDT
 	Interrupts::CreateIDT();
 	// Load IDT

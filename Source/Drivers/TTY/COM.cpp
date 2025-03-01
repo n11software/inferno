@@ -58,7 +58,8 @@ void kputchar(char a) {
     }
     
     // Also output to screen if framebuffer is available
-    fbPrintChar(a, 0xFFFFFFFF, 1);  // Add default color and scale arguments
+	if (fb_->Width > 720) fbPrintChar(a, 0xFFFFFFFF, 2);  // Add default color and scale arguments
+	else fbPrintChar(a, 0xFFFFFFFF, 1);  // Add default color and scale arguments
 }
 
 char* strchr(const char* str, int c) {
