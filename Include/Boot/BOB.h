@@ -10,17 +10,17 @@
 #include <Drivers/Graphics/Framebuffer.h>
 
 struct MemoryDescriptor {
-    unsigned int Type;
-    void* PhysicalStart, *VirtualStart;
-    unsigned long long NumberOfPages, Attribute;
+	unsigned int Type;
+	void* PhysicalStart, *VirtualStart;
+	unsigned long long NumberOfPages, Attribute;
 };
 
 struct BOB {
-    unsigned long long DescriptorSize, MapSize;
-    MemoryDescriptor* MemoryMap;
-    void* RSDP;
-    Framebuffer* framebuffer;
-    void* FontFile;
-    void* KernelAddress;
-    unsigned long long KernelSize;
+	unsigned long long DescriptorSize, MapSize;
+	MemoryDescriptor* MemoryMap;
+	void* RSDP;
+	Framebuffer* framebuffer;
+	void* FontFile;
+	void* KernelAddress;
+	unsigned long long KernelSize;
 };

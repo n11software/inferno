@@ -10,9 +10,9 @@
 
 namespace CPU {
 	void CPUDetect();
-        void IntelHandler();
-        void AMDHandler();
-        void UnknownHandler();
+		void IntelHandler();
+		void AMDHandler();
+		void UnknownHandler();
 }
 
 #endif //CPU_H

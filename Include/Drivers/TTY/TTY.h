@@ -4,10 +4,10 @@
 
 // Define AnsiState enum once
 enum AnsiState {
-    NORMAL,
-    ESC_SEEN,
-    BRACKET_SEEN,
-    PARSING_NUMBER
+	NORMAL,
+	ESC_SEEN,
+	BRACKET_SEEN,
+	PARSING_NUMBER
 };
 
 // Direct framebuffer functions
@@ -48,21 +48,21 @@ extern const uint32_t ansi_colors[];
 
 // Window declarations
 class Window {
-    public:
-        Window();
-        Window(int x, int y, int width, int height);
-        void Close();
-        void Draw(int x, int y, int color);
-        void drawChar(char ch, int x, int y, unsigned long long color, int scale = 2);
-        void drawString(const char* str, int x, int y, unsigned long long color, int scale = 2, bool center = false);
-        void DrawRectangle(int x, int y, int width, int height, int color);
-        void DrawRectircle(int x, int y, int width, int height, int radius, int color);
-        void DrawCircle(int centerX, int centerY, int radius, int color);
-        void DrawLine(int x1, int x2, int y, int color);
-        void DrawFilledCircle(int centerX, int centerY, int radius, int color);
-        void Swap(); // Kept for API compatibility but now does nothing
-    private:
-        int Width, Height, x, y;
-        int current_x = 0;
-        int current_y = 0;
+	public:
+		Window();
+		Window(int x, int y, int width, int height);
+		void Close();
+		void Draw(int x, int y, int color);
+		void drawChar(char ch, int x, int y, unsigned long long color, int scale = 2);
+		void drawString(const char* str, int x, int y, unsigned long long color, int scale = 2, bool center = false);
+		void DrawRectangle(int x, int y, int width, int height, int color);
+		void DrawRectircle(int x, int y, int width, int height, int radius, int color);
+		void DrawCircle(int centerX, int centerY, int radius, int color);
+		void DrawLine(int x1, int x2, int y, int color);
+		void DrawFilledCircle(int centerX, int centerY, int radius, int color);
+		void Swap(); // Kept for API compatibility but now does nothing
+	private:
+		int Width, Height, x, y;
+		int current_x = 0;
+		int current_y = 0;
 };

@@ -31,7 +31,7 @@ namespace CPU {
 	char *Model() {
 		int b, c, d, e;
 		int family, model, stepping;
-        	unsigned int id;
+			unsigned int id;
 		unsigned int brand[12];
 
 		cpuid(0x80000002, brand[0], brand[1], brand[2], brand[3]);
@@ -44,7 +44,7 @@ namespace CPU {
 
 		stepping = b & 0xF;
 		model = (b >> 4) & 0xF;
-		family = (b >> 8) & 0xF;	        
+		family = (b >> 8) & 0xF;			
 
 		prInfo("cpu", "CPU0: Origin=%s  Id=0x%x  Family=0x%x  Model=0x%x  Stepping=%d", VendorID(), id, family, model, stepping);
 		prInfo("cpu", "CPU0: %s", (char *)brand);

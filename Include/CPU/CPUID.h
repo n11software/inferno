@@ -8,8 +8,8 @@
 #pragma once
 
 namespace CPU {
-    const char *VendorID();
-    char *Model();
+	const char *VendorID();
+	char *Model();
 }
 
 #define cpuid(in, a, b, c, d) __asm__ __volatile__ ("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(in));

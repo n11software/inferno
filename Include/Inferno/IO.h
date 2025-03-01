@@ -46,17 +46,17 @@ void outl(unsigned short port, unsigned int value);
 void outl_p(unsigned int value, unsigned short port);
 
 void insb(unsigned short port, void* addr,
-    unsigned long count);
+	unsigned long count);
 void insw(unsigned short port, void* addr,
-    unsigned long count);
+	unsigned long count);
 void insl(unsigned short port, void* addr,
-    unsigned long count);
+	unsigned long count);
 void outsb(unsigned short port, const void* addr,
-    unsigned long count);
+	unsigned long count);
 void outsw(unsigned short port, const void* addr,
-    unsigned long count);
+	unsigned long count);
 void outsl(unsigned short port, const void* addr,
-    unsigned long count);
+	unsigned long count);
 
 void io_wait();
 

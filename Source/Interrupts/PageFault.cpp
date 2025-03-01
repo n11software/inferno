@@ -10,6 +10,6 @@
 #include <Interrupts/PageFault.hpp>
 
 void PageFault(void*) {
-    kprintf("\r\e[31m[ERROR] Page Fault\e[0m\n\r");
-    while(1) asm("hlt");
+	kprintf("\r\e[31m[ERROR] Page Fault\e[0m\n\r");
+	while(1) asm("hlt");
 }

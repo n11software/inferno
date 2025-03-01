@@ -11,8 +11,8 @@
 #include <Inferno/IO.h>
 
 enum {
-      cmosAddress = 0x70,
-      cmosData    = 0x71
+	  cmosAddress = 0x70,
+	  cmosData	= 0x71
 };
 
 unsigned char getRegister(int reg);
