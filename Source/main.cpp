@@ -30,6 +30,7 @@
 #include <Memory/DirectVirtTest.hpp>
 #include <Memory/VMAliasTest.hpp>
 #include <Memory/SimpleVMAliasTest.hpp>
+#include <Interrupts/HPET.hpp>
 
 // Drivers
 #include <Drivers/ACPI/acpi.h>
@@ -171,11 +172,23 @@ current_position:
 	Interrupts::CreateISR(0x0E, (void*)PageFault);
 	Interrupts::CreateISR(0x08, (void*)DoublePageFault);
 
-	// Load APIC
-	if (APIC::Capable()) {
-			APIC::Enable();
-			prInfo("apic", "initalized APIC");
-	}
+	// Replace the existing APIC initialization with:
+    if (APIC::Capable()) {
+        if (APIC::Initialize()) {
+            prInfo("kernel", "APIC initialized successfully");
+            
+            // Configure timer (optional)
+            APIC::ConfigureTimer(0x3);    // Divide by 16
+            APIC::SetTimerCount(10000000);// Set initial count
+            
+            uint32_t version = APIC::GetVersion();
+            prInfo("apic", "APIC Version: 0x%x", version);
+        } else {
+            prErr("kernel", "Failed to initialize APIC");
+        }
+    } else {
+        prErr("kernel", "APIC not supported on this system");
+    }
 
 	PCI::init();
 
@@ -373,9 +386,20 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
     // Initialize ACPI and perform shutdown
     prInfo("kernel", "Initializing ACPI for system shutdown...");
     if (ACPI::init(bob->RSDP)) {
-        prInfo("kernel", "ACPI initialized, shutting down system...");
+        // Initialize HPET
+        if (HPET::Initialize()) {
+            HPET::Enable();
+            prInfo("kernel", "Waiting 2 minutes before shutdown...");
+            
+            // Wait for 2 minutes (120 seconds = 120,000,000 microseconds)
+            HPET::Wait(120*1000);
+            
+            prInfo("kernel", "Time's up! Initiating shutdown...");
+        } else {
+            prErr("kernel", "HPET initialization failed, proceeding with immediate shutdown");
+        }
+
         ACPI::shutdown();
-        
         // If shutdown fails, fall back to halt loop
         prErr("kernel", "ACPI shutdown failed, halting CPU");
     } else {

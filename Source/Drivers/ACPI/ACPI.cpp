@@ -10,6 +10,7 @@
 #include <Inferno/IO.h>
 #include <Inferno/Log.h>
 #include <Inferno/stdint.h>
+#include <Memory/Mem_.hpp>
 
 namespace ACPI {
     // Global variables to store ACPI information
@@ -289,5 +290,24 @@ namespace ACPI {
         // If we get here, nothing worked
         prErr("acpi", "All reboot methods failed");
         return false;
+    }
+
+    // Add this new function
+    void* FindTable(const char* signature) {
+        if (!rsdt) return nullptr;
+        
+        uint32_t entries = (rsdt->Length - sizeof(RSDT)) / 4;
+        uint32_t* tables = (uint32_t*)((uint64_t)rsdt + sizeof(RSDT));
+        
+        for (uint32_t i = 0; i < entries; i++) {
+            ACPISDTHeader* header = (ACPISDTHeader*)(uint64_t)tables[i];
+            if (!header) continue;
+            
+            if (memcmp(header->Signature, signature, 4) == 0) {
+                return header;
+            }
+        }
+        
+        return nullptr;
     }
 }

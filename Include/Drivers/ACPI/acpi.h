@@ -108,4 +108,41 @@ namespace ACPI {
 	void tryApmShutdown();
 	void tryQemuShutdown();
 	void tryAcpiShutdown();
+
+    struct GenericAddressStructure {
+        uint8_t address_space;
+        uint8_t bit_width;
+        uint8_t bit_offset;
+        uint8_t access_size;
+        uint64_t address;
+    } __attribute__((packed));
+
+    struct ACPISDTHeader {
+        char Signature[4];
+        uint32_t Length;
+        uint8_t Revision;
+        uint8_t Checksum;
+        char OEMID[6];
+        char OEMTableID[8];
+        uint32_t OEMRevision;
+        uint32_t CreatorID;
+        uint32_t CreatorRevision;
+    } __attribute__((packed));
+
+    struct HPETTable {
+        ACPISDTHeader header;
+        uint8_t hardware_rev_id;
+        uint8_t comparator_count:5;
+        uint8_t counter_size:1;
+        uint8_t reserved:1;
+        uint8_t legacy_replacement:1;
+        uint16_t pci_vendor_id;
+        GenericAddressStructure address;
+        uint8_t hpet_number;
+        uint16_t minimum_tick;
+        uint8_t page_protection;
+    } __attribute__((packed));
+
+    // Add function to find ACPI tables by signature
+    void* FindTable(const char* signature);
 }
