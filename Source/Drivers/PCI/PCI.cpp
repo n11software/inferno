@@ -70,6 +70,8 @@ namespace PCI {
 	void init() {
 		prInfo("PCI", "PCI Initialized");
 		prInfo("PCI", "Using configuration mode 1 by default");
-		PCI::check_bus(0);
+		for (int i = 0; i < 255; i++) {
+			PCI::check_bus(i);
+		}
 	}
 }
