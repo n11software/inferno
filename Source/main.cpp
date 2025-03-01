@@ -41,9 +41,8 @@ extern "C" {
 }
 
 __attribute__((sysv_abi)) void Inferno(BOB* bob) {
-	// Initialize TTY
-	setFont(bob->FontFile);
-	setFramebuffer(bob->framebuffer);
+	// init fb
+	initFB(bob->framebuffer);
 	// test color red
 	prInfo("kernel", "Inferno kernel version 0.1alpha");
 	kprintf("Copyright 2021-2025 N11 Software.\nCopyright 2018-2021 Ariston Lorenzo and Levi Hicks. All rights reserved.\nSee COPYRIGHT in the Inferno source tree for more information.\n");

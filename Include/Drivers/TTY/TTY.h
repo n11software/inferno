@@ -2,11 +2,33 @@
 #include <Drivers/Graphics/Framebuffer.h>
 #include <Inferno/stdint.h>
 
+// Direct framebuffer functions
+void InitializeScreen(Framebuffer* _fb);
+void fbDrawPixel(int x, int y, uint32_t color);
+void fbDrawChar(char ch, int x, int y, uint32_t color, int scale);
+void fbScrollScreen(int scale);
+void fbPrintChar(char c, uint32_t color = 0xFFFFFFFF, int scale = 1);
+void fbPrintString(const char* str, uint32_t color = 0xFFFFFFFF, int scale = 1);
+void fbClearScreen();
+void fbSetCursor(int x, int y);
+
+// Existing functions
 void SetFramebuffer(Framebuffer* _fb);
 void SetFont(void* _font);
 void putpixel(unsigned int x, unsigned int y, unsigned int color);
-void swapBuffers();
 
+// Global variables
+extern int fb_cursor_x;
+extern int fb_cursor_y;
+extern Framebuffer* fb;
+extern void* font;
+
+// Macro for ASCII to font index conversion
+#ifndef ASCII_TO_FONT
+#define ASCII_TO_FONT(c) ((c) < 32 ? 0 : ((c) > 127 ? 0 : ((c) - 32)))
+#endif
+
+// Window declarations
 class Window {
     public:
         Window();
@@ -20,10 +42,9 @@ class Window {
         void DrawCircle(int centerX, int centerY, int radius, int color);
         void DrawLine(int x1, int x2, int y, int color);
         void DrawFilledCircle(int centerX, int centerY, int radius, int color);
-        void Swap();
+        void Swap(); // Kept for API compatibility but now does nothing
     private:
         int Width, Height, x, y;
-        uint8_t* WindowBuffer;
         int current_x = 0;
         int current_y = 0;
 };

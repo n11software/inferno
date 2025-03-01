@@ -11,122 +11,15 @@
 #include <Inferno/IO.h>
 #include <Drivers/TTY/COM.h>
 #include <Drivers/Graphics/Framebuffer.h>
-#include <Drivers/TTY/TTY.h>
-#include <Drivers/TTY/VGA_Font.h>  // Add this include
-#include <Memory/Mem_.hpp>
 
 #include <Inferno/Log.h>
 
+Framebuffer* fb_;
+
 bool COM1Active = false;
-Framebuffer* COM1Framebuffer;
-Window COM1Window;
-void* font_;
-bool gui_;
 
-void setFramebuffer(Framebuffer* fb, bool gui) {
-	gui_ = gui;
-	COM1Framebuffer = fb;
-}
-
-void setFont(void* f) {
-	font_ = f;
-}
-
-Window window;
-int width = 400;
-int height = 300;
-int x,y;
-
-char *strcpy(char* dest, const char* src) {
-	if (dest == nullptr) {
-		return nullptr;
-	}
-
-	char *ptr = dest;
-
-	while (*src != '\0') {
-		*dest = *src;
-		dest++;
-		src++;
-	}
-
-	*dest = '\0';
-
-	return ptr;
-}
-
-#define LINE_HEIGHT 12
-#define CONSOLE_COLS 41  // (400 - 26) / 8 to stay within width-26
-#define CONSOLE_ROWS 21  // (300 - 48) / LINE_HEIGHT to stay within height-8-14-26
-char consoleBuffer[CONSOLE_ROWS][CONSOLE_COLS + 1];  // +1 for null terminator
-int currentRow = 0;
-int currentCol = 0;
-
-// Add color buffer per line
-uint32_t lineColors[CONSOLE_ROWS] = {0};
-
-void clearConsoleBuffer() {
-    for(int i = 0; i < CONSOLE_ROWS; i++) {
-        for(int j = 0; j < CONSOLE_COLS; j++) {
-            consoleBuffer[i][j] = ' ';
-        }
-        consoleBuffer[i][CONSOLE_COLS] = '\0';  // Null terminate each line
-    }
-    currentRow = 0;
-    currentCol = 0;
-    for(int i = 0; i < CONSOLE_ROWS; i++) {
-        lineColors[i] = gui_ ? 0x000000 : 0xFFFFFF;  // Default: black for GUI, white for non-GUI
-    }
-    // Clear entire console area
-    window.DrawRectircle(8, 37, width-26, height-8-14-26, 7, 0xf4f4f4);
-    window.Swap();
-    swapBuffers();
-}
-
-void redrawCurrentLine() {
-    // Clear the entire line area including margins
-    int y = 37 + (currentRow * LINE_HEIGHT);
-    window.DrawRectircle(8, y, width-26, LINE_HEIGHT, 7, 0xf4f4f4);
-    
-    // Ensure null termination
-    consoleBuffer[currentRow][currentCol] = '\0';
-    
-    // Only draw if there's content
-    if(currentCol > 0) {
-        window.drawString(consoleBuffer[currentRow], 15, y, 0x000000, 1);
-    }
-    
-    window.Swap();
-    swapBuffers();
-}
-
-void redrawFromLine(int startRow) {
-    // Clear entire console area first
-    window.DrawRectircle(8, 37 + (startRow * LINE_HEIGHT), width-26, height-8-14-26-(startRow * LINE_HEIGHT), 7, 0xf4f4f4);
-    
-    // Draw each line as a string
-    for(int i = startRow; i <= currentRow; i++) {
-        if(consoleBuffer[i][0] != '\0' && consoleBuffer[i][0] != ' ') {
-            window.drawString(consoleBuffer[i], 15, 37 + (i * LINE_HEIGHT), 0x000000, 1);
-        }
-    }
-    window.Swap();
-    swapBuffers();
-}
-
-void scrollBuffer() {
-    // Move text and colors up
-    for(int i = 0; i < CONSOLE_ROWS - 1; i++) {
-        strcpy(consoleBuffer[i], consoleBuffer[i + 1]);
-        lineColors[i] = lineColors[i + 1];
-    }
-    // Clear the last line
-    for(int j = 0; j < CONSOLE_COLS; j++) {
-        consoleBuffer[CONSOLE_ROWS - 1][j] = ' ';
-    }
-    consoleBuffer[CONSOLE_ROWS - 1][CONSOLE_COLS] = '\0';
-    lineColors[CONSOLE_ROWS - 1] = gui_ ? 0x000000 : 0xFFFFFF;  // Reset to default color
-    redrawFromLine(0);
+void initFB(Framebuffer* fb) {
+	fb_ = fb;
 }
 
 void InitializeSerialDevice() {
@@ -143,53 +36,6 @@ void InitializeSerialDevice() {
     outb(0x3f8 + 4, 0x0F);
     COM1Active = true;
     prInfo("kernel", "serial device initalized");
-
-    if (!gui_) {
-        // Clear entire framebuffer to black
-        uint32_t* fb_addr = (uint32_t*)COM1Framebuffer->Address;
-        for (int i = 0; i < COM1Framebuffer->Width * COM1Framebuffer->Height; i++) {
-            fb_addr[i] = 0;  // Black background
-        }
-        return;
-    }
-
-    if (COM1Framebuffer != nullptr) {
-        prInfo("kernel", "serial framebuffer initialized");
-    } else return;
-	if (font_ != nullptr) {
-		prInfo("kernel", "serial font initialized");
-	} else return;
-	// Make window
-	SetFont(font_);
-	SetFramebuffer(COM1Framebuffer);
-	// create window
-    x = (COM1Framebuffer->Width - width) / 2;
-    y = (COM1Framebuffer->Height - height) / 2;
-	window = Window(x, y, width, height);
-	SetFramebuffer(COM1Framebuffer);
-	prInfo("tty", "initialized TTY");
-	void* backBuffer = (void*)0x100000;
-    memset(backBuffer, 0x42, COM1Framebuffer->Width * COM1Framebuffer->Height * 4);
-
-	window.DrawRectircle(0, 0, width, height, 7, 0xffffff);
-    window.DrawRectircle(8, 14+16, width-16, height-8-14-16, 7, 0xf4f4f4);
-	// add title
-	window.drawString("Inferno", 8+((width-16)/2)-30, 9, 0x000000, 2, true);
-	
-	window.Swap();
-	swapBuffers();
-    clearConsoleBuffer();
-
-    if (gui_) {
-        window.DrawRectircle(0, 0, width, height, 7, 0xFFFFFF);  // White background
-		window.DrawFilledCircle(14, 14, 6, 0xff0000);
-		window.DrawFilledCircle(14+16, 14, 6, 0x00f000);
-		window.DrawFilledCircle(14+16+16, 14, 6, 0xffd629);
-        window.DrawRectircle(8, 14+16, width-16, height-8-14-16, 7, 0xF4F4F4);  // Light gray console area
-        window.drawString("Inferno", 8+((width-16)/2)-30, 9, 0x000000, 2, true);
-        window.Swap();
-        swapBuffers();
-    }
 }
 
 int SerialRecieveEvent() { return inb(0x3f8 + 5) & 1; }
@@ -201,201 +47,18 @@ char AwaitSerialResponse() {
 
 int SerialWait() { return inb(0x3f8 + 5) & 0x20; }
 
-char* ConsoleOutput;
-int consoleX = 5;
-int consoleY = 5;
-
-// Add these variables for non-GUI mode
-int screen_x = 0;
-int screen_y = 0;
-
-// Add current color for non-GUI mode
-uint32_t current_color = 0xFFFFFF;
-
-// Add these at file scope
-static bool in_escape_seq = false;
-static int escape_code = 0;
-
-void directPutchar(char c) {
-    if (c == '\033') {
-        in_escape_seq = true;
-        escape_code = 0;
-        return;
-    }
-
-    if (in_escape_seq) {
-        if (c >= '0' && c <= '9') {
-            escape_code = escape_code * 10 + (c - '0');
-            return;
-        }
-        if (c == 'm') {
-            switch (escape_code) {
-                case 0: current_color = 0xFFFFFF; break;
-                case 31: current_color = 0xFF0000; break;
-                case 32: current_color = 0x00FF00; break;
-                case 33: current_color = 0xFFFF00; break;
-                case 34: current_color = 0x0000FF; break;
-                case 35: current_color = 0xFF00FF; break;
-                case 36: current_color = 0x00FFFF; break;
-                case 37: current_color = 0xFFFFFF; break;
-            }
-            in_escape_seq = false;
-            return;
-        }
-        // If we get here with unknown escape sequence, ignore it
-        if (c == '[') return;
-        in_escape_seq = false;
-    }
-
-    // Draw character only if not in escape sequence
-    const int CHAR_WIDTH = 8;
-    const int CHAR_HEIGHT = 12;
-    const int MAX_X = COM1Framebuffer->Width - CHAR_WIDTH;
-    const int MAX_Y = COM1Framebuffer->Height - CHAR_HEIGHT;
-
-    if (c == '\n') {
-        screen_x = 0;
-        screen_y += CHAR_HEIGHT;
-        if (screen_y >= MAX_Y) {
-            // Scroll the screen up by copying lines
-            uint32_t* fb_addr = (uint32_t*)COM1Framebuffer->Address;
-            int line_width = COM1Framebuffer->PPSL;
-            
-            // Copy each line up
-            for (int y = CHAR_HEIGHT; y < COM1Framebuffer->Height; y++) {
-                for (int x = 0; x < COM1Framebuffer->Width; x++) {
-                    fb_addr[(y - CHAR_HEIGHT) * line_width + x] = fb_addr[y * line_width + x];
-                }
-            }
-            
-            // Clear the new line
-            for (int y = MAX_Y; y < COM1Framebuffer->Height; y++) {
-                for (int x = 0; x < COM1Framebuffer->Width; x++) {
-                    fb_addr[y * line_width + x] = 0;
-                }
-            }
-            
-            screen_y = MAX_Y - CHAR_HEIGHT;
-        }
-        return;
-    }
-
-    // Draw character
-    uint8_t* fb_addr = (uint8_t*)COM1Framebuffer->Address;
-    uint8_t idx = ASCII_TO_FONT(c);
-
-	if (c == '\r') {
-		screen_x = 0;
-		return;
-	}
-    
-    for (int row = 0; row < 8; row++) {
-        uint8_t line = font8x8[idx][row];
-        for (int col = 0; col < 8; col++) {
-            if (line & (1 << (7 - col))) {
-                int x = screen_x + col;
-                int y = screen_y + row;
-                if (x < COM1Framebuffer->Width && y < COM1Framebuffer->Height) {
-                    uint32_t* pixel = (uint32_t*)(fb_addr + (y * COM1Framebuffer->PPSL * 4) + (x * 4));
-                    *pixel = current_color;  // Use current color instead of fixed white
-                }
-            }
-        }
-    }
-    
-    screen_x += CHAR_WIDTH;
-    if (screen_x >= MAX_X) {
-        screen_x = 0;
-        screen_y += CHAR_HEIGHT;
-        if (screen_y >= MAX_Y) {
-            screen_y = 0;  // Wrap to top if we run out of scroll space
-        }
-    }
-}
+// Forward declaration of the fb_PrintChar function
+extern void fbPrintChar(char c, uint32_t color, int scale);
 
 void kputchar(char a) {
-    if (!COM1Active) return;
-    while (SerialWait() == 0);
-    outb(0x3f8, a);
-
-    static bool in_escape = false;
-    static int code = 0;
-
-    if (!gui_) {
-        if (COM1Framebuffer != nullptr) {
-            directPutchar(a);
-        }
-        return;
+    // Output to serial port
+    if (COM1Active) {
+        while (SerialWait() == 0);
+        outb(0x3f8, a);
     }
-
-    if (in_escape) {
-        if (a >= '0' && a <= '9') {
-            code = code * 10 + (a - '0');
-        } else if (a == 'm') {
-            switch (code) {
-                case 0: lineColors[currentRow] = gui_ ? 0x000000 : 0xFFFFFF; break; // Reset to default
-                case 31: lineColors[currentRow] = 0xFF0000; break;
-                case 32: lineColors[currentRow] = 0x00FF00; break;
-                case 33: lineColors[currentRow] = 0xFFFF00; break;
-                case 34: lineColors[currentRow] = 0x0000FF; break;
-                case 35: lineColors[currentRow] = 0xFF00FF; break;
-                case 36: lineColors[currentRow] = 0x00FFFF; break;
-                case 37: lineColors[currentRow] = 0xFFFFFF; break;
-            }
-            in_escape = false;
-            code = 0;
-        }
-        return;
-    }
-
-    if (a == '\033') {
-        in_escape = true;
-        code = 0;
-        return;
-    }
-
-    if (a == '\n') {
-        // Draw current line with its color
-        window.DrawRectircle(8, 37 + (currentRow * LINE_HEIGHT), width-26, LINE_HEIGHT, 7, 0xf4f4f4);
-        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), lineColors[currentRow], 1);
-        currentRow++;
-        currentCol = 0;
-        lineColors[currentRow] = lineColors[currentRow-1];  // Inherit color from previous line
-        if(currentRow >= CONSOLE_ROWS) {
-            scrollBuffer();
-            currentRow = CONSOLE_ROWS - 1;
-        }
-        window.Swap();
-        swapBuffers();
-    } else {
-        if(currentCol >= CONSOLE_COLS-1) {
-            // Line wrap
-            consoleBuffer[currentRow][currentCol] = a;
-            consoleBuffer[currentRow][CONSOLE_COLS] = '\0';
-            
-            // Draw the completed line
-            window.DrawRectircle(8, 37 + (currentRow * LINE_HEIGHT), width-26, LINE_HEIGHT, 7, 0xf4f4f4);
-            window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), lineColors[currentRow], 1);
-            
-            currentRow++;
-            currentCol = 0;
-            
-            if(currentRow >= CONSOLE_ROWS) {
-                scrollBuffer();
-                currentRow = CONSOLE_ROWS - 1;
-            }
-            
-            window.Swap();
-            swapBuffers();
-        } else {
-            // Just store the character without drawing
-            consoleBuffer[currentRow][currentCol++] = a;
-        }
-    }
-
-    if (gui_) {
-        window.drawString(consoleBuffer[currentRow], 15, 37 + (currentRow * LINE_HEIGHT), lineColors[currentRow], 1);
-    }
+    
+    // Also output to screen if framebuffer is available
+    fbPrintChar(a, 0xFFFFFFFF, 1);  // Add default color and scale arguments
 }
 
 char* strchr(const char* str, int c) {
@@ -437,6 +100,24 @@ int strlen(const char* str) {
     }
 }
 
+char *strcpy(char* dest, const char* src) {
+	if (dest == nullptr) {
+		return nullptr;
+	}
+
+	char *ptr = dest;
+
+	while (*src != '\0') {
+		*dest = *src;
+		dest++;
+		src++;
+	}
+
+	*dest = '\0';
+
+	return ptr;
+}
+
 struct PrintData {
     bool is_format = false, alt = false, right = false;
     int size = 0, spacing = 0, sign = 0, base = 0, baseprefix = 0, printedchrs = 0;
@@ -467,7 +148,6 @@ void _reset(PrintData* pd) {
 
 void _print(PrintData* pd, const char* str) {
     for (int i = 0; str[i] != 0; i++) kputchar(str[i]);
-
     pd->printedchrs += strlen(str);
 }
 

@@ -10,8 +10,7 @@
 #include <Inferno/IO.h>
 #include <Drivers/Graphics/Framebuffer.h>
 
-void setFramebuffer(Framebuffer* fb, bool gui = false);
-void setFont(void* font);
+void initFB(Framebuffer* fb);
 
 void InitializeSerialDevice();
 char AwaitSerialResponse();
