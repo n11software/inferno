@@ -102,13 +102,17 @@ namespace APIC {
         DisablePIC();
         
         // Enable APIC in MSR
+		prDebug("apic", "Enabling APIC in MSR");
         uint64_t msr = CPU::ReadMSR(0x1B);
         msr |= (1 << 11);    // Enable APIC
+		prDebug("apic", "Writing to MSR");
         CPU::WriteMSR(0x1B, msr);
         
+		prDebug("apic", "Setup LOAPIC");
         // Set up Local APIC
         SetupLocalAPIC();
         
+		prDebug("apic", "Setup SIPs");
         // Configure spurious interrupts
         ConfigureSpuriousInterrupts();
         
