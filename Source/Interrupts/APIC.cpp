@@ -61,36 +61,21 @@ namespace APIC {
 
 	void DisablePIC() {
         prInfo("apic", "Disabling legacy PIC...");
-        // Mask all interrupts
-        outb(0xA1, 0xFF);
-        outb(0x21, 0xFF);
         
-        // Start initialization sequence
-        outb(0x20, 0x11);
-        outb(0xA0, 0x11);
+        // First send EOIs to both PICs to clear any pending interrupts
+        prDebug("apic", "Sending EOIs to clear pending interrupts");
+        outb(0x20, 0x20);  // EOI to master PIC
+        outb(0xA0, 0x20);  // EOI to slave PIC
         io_wait();
         
-        // Remap PIC vectors out of the way
-        outb(0x21, 0xE0);    // Master PIC vector offset
-        outb(0xA1, 0xE8);    // Slave PIC vector offset
+        // Mask all PIC interrupts - this is safer than remapping
+        prDebug("apic", "Masking all PIC interrupts");
+        outb(0xA1, 0xFF);  // Mask all interrupts on slave PIC
+        io_wait();
+        outb(0x21, 0xFF);  // Mask all interrupts on master PIC
         io_wait();
         
-        // Tell Master PIC there is a slave PIC at IRQ2
-        outb(0x21, 0x04);
-        // Tell Slave PIC its cascade identity
-        outb(0xA1, 0x02);
-        io_wait();
-        
-        // Set 8086 mode
-        outb(0x21, 0x01);
-        outb(0xA1, 0x01);
-        io_wait();
-        
-        // Mask all interrupts again
-        outb(0xA1, 0xFF);
-        outb(0x21, 0xFF);
-        
-        prInfo("apic", "Legacy PIC disabled");
+        prInfo("apic", "Legacy PIC disabled (masked)");
     }
 
     bool Initialize() {
