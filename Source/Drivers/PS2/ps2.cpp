@@ -36,34 +36,71 @@ namespace PS2 {
 
 	void enablePS2Controller() {
 		prInfo("ps2kb0", "enabling ps/2 controller...");
-		outb(PS2_COMMAND, 0xAE);
-		HPET::Wait(100);
 
-		if (!isControllerReady()) {
-			prErr("ps2kb0", "PS/2 controller is not ready, aborting...");
+		outb(0x64, 0xFE);
+		HPET::Wait(200);
+
+		prDebug("ps2kb0", "checking controller status");
+		uint8_t status = inb(0x64);
+
+		if (status & 0x02) {
+			prDebug("ps2kb0", "sending command to enable...");
+			outb(0x64, 0xAE);
+			HPET::Wait(200);
+		} else {
+			prErr("ps2kb0", "Error: PS/2 controller input buffer is full. Aborting.");
 			return;
 		}
-		prInfo("ps2kb0", "PS/2 controller enabled sucessfully");
+
+		if (status & 0x01) {
+			uint8_t res = inb(0x60);
+			prDebug("ps2kb0", "controller res: 0x%x", res);
+
+			if (res != 0xFA) {
+				prErr("ps2kb0", "error: unexpected response after enabling controller, aborting");
+				return;
+			}
+			prInfo("ps2kb0", "PS/2 controller enabled");
+		} else {
+			prErr("ps2kb0", "PS/2 controller did not respond, aborting");
+			return;
+		}
 	}
 
 	void enablePS2Keyboard() {
 		prInfo("ps2kb0", "enabling ps/2 keyboard...");
-		if (!isControllerReady()) {
-			prErr("ps2kb0", "PS/2 controller is not ready to send keyboard enable command...");
-			return;
+
+		uint8_t status;
+		int tries = 0;
+		while (tries < 5) {
+			status = inb(0x64);
+			if (status & 0x62) {
+				prDebug("ps2kb0", "controller ready, status 0x%x", status);
+				break;
+			}
+			prDebug("ps2kb0", "waiting for controller to be ready. status 0x%x", status);
+			HPET::Wait(100);
+			tries++;
 		}
 
-		prDebug("ps2kb0", "sending keyboard enable command...");
-		outb(0x64, 0xF5);
-		prDebug("ps2kb0", "waiting before getting response");
-		HPET::Wait(100);
-		uint8_t response = inb(0x60);
-		prInfo("ps2kb0", "keyboard response: 0x%x", response);
-
-		if (response == 0xFA) {
-			prInfo("ps2kb0", "PS/2 keyboard initalized successfully");
+		if (tries == 5) {
+			prErr("ps2kb0", "error: PS/2 controller not ready after 5 attempts.");
+			return;
 		} else {
-			prErr("ps2kb0", "PS/2 keyboard failed to initalize");
+
+			prDebug("ps2kb0", "sending keyboard enable command...");
+			outb(0x64, 0xF6);
+			prDebug("ps2kb0", "waiting before getting response");
+			HPET::Wait(100);
+			uint8_t response = inb(0x60);
+			prInfo("ps2kb0", "keyboard response: 0x%x", response);
+
+			if (response == 0xFA) {
+				prInfo("ps2kb0", "PS/2 keyboard initalized successfully");
+			} else {
+				prErr("ps2kb0", "PS/2 keyboard failed to initalize");
+			}
+
 		}
 	}
 

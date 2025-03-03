@@ -34,6 +34,7 @@
 
 // Drivers
 #include <Drivers/ACPI/acpi.h>
+#include <Drivers/Keyboard/keyboard.h>
 #include <Drivers/RTC/RTC.h>
 #include <Drivers/PCI/PCI.h>
 #include <Drivers/PS2/ps2.h>
@@ -203,7 +204,7 @@ current_position:
 
 	PCI::init();
 
-	PS2::init();
+	//PS2::init();
 
 	// Usermode
 	#if EnableGDT == true
@@ -395,7 +396,7 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
     } else {
         prErr("kernel", "Virtual memory aliasing test FAILED");
     }
-    
+
     // Fall back to halt loop if ACPI shutdown fails
     while (true) asm("hlt");
 }
