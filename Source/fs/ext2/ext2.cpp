@@ -1,4 +1,4 @@
-#include <Drivers/Storage/FS/EXT2.h>
+#include <fs/ext2/ext2.h>
 #include <Drivers/Storage/AHCI/AHCI.h>
 #include <Inferno/Log.h>
 #include <Inferno/string.h> // Added explicit include for string functions

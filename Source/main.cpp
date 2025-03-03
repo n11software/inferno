@@ -40,7 +40,8 @@
 #include <Drivers/PCI/PCI.h>
 #include <Drivers/PS2/ps2.h>
 #include <Drivers/Storage/AHCI/AHCI.h>
-#include <Drivers/Storage/FS/EXT2.h>
+
+#include <fs/ext2/ext2.h>
 
 // Forward declaration for our helper function
 bool DirectCreateMapping(uint64_t cr3, uint64_t virtAddr, uint64_t physAddr);
