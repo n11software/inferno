@@ -190,6 +190,16 @@ current_position:
         prErr("kernel", "APIC not supported on this system");
     }
 
+	if (ACPI::init(bob->RSDP)) {
+		if (HPET::Initialize()) {
+			HPET::Enable();
+		} else {
+			prErr("kernel", "HPET init failed...");
+		}
+	} else {
+		prErr("kernel", "ACPI initalization failed.");
+	}
+
 	PCI::init();
 
 	// Usermode
@@ -381,29 +391,6 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
         prInfo("kernel", "Virtual memory aliasing test PASSED");
     } else {
         prErr("kernel", "Virtual memory aliasing test FAILED");
-    }
-    
-    // Initialize ACPI and perform shutdown
-    prInfo("kernel", "Initializing ACPI for system shutdown...");
-    if (ACPI::init(bob->RSDP)) {
-        // Initialize HPET
-        if (HPET::Initialize()) {
-            HPET::Enable();
-            prInfo("kernel", "Waiting 2 minutes before shutdown...");
-            
-            // Wait for 2 minutes (120 seconds = 120,000,000 microseconds)
-            HPET::Wait(120*1000);
-            
-            prInfo("kernel", "Time's up! Initiating shutdown...");
-        } else {
-            prErr("kernel", "HPET initialization failed, proceeding with immediate shutdown");
-        }
-
-        ACPI::shutdown();
-        // If shutdown fails, fall back to halt loop
-        prErr("kernel", "ACPI shutdown failed, halting CPU");
-    } else {
-        prErr("kernel", "ACPI initialization failed, halting CPU");
     }
     
     // Fall back to halt loop if ACPI shutdown fails
