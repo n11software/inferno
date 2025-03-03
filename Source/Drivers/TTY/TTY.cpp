@@ -141,7 +141,8 @@ void fbScrollScreen(int scale) {
 // Function to print a character to the screen at the current cursor position
 void fbPrintChar(char c, uint32_t color, int scale) {
 	if (!fb) return;
-	
+	if (!font) return;
+
 	// Handle ANSI escape sequences
 	if (ansi_state == NORMAL) {
 		if (c == '\033') {
@@ -186,14 +187,19 @@ void fbPrintChar(char c, uint32_t color, int scale) {
 		fb_cursor_x += char_width * 4;
 		fb_cursor_x -= fb_cursor_x % (char_width * 4);
 	}
-	else if (c == '\b') {
-		// Handle backspace - move cursor back and clear the character
+	else if (c == '\b' || c == 0x7F) {  // Handle both 0x08 and 0x7F as backspace
+		// Move the cursor back and clear the character
 		if (fb_cursor_x >= char_width) {
 			fb_cursor_x -= char_width;
-			// Clear character space
-			for (int y = fb_cursor_y; y < fb_cursor_y + char_height; y++) {
-				for (int x = fb_cursor_x; x < fb_cursor_x + char_width; x++) {
-					fbDrawPixel(x, y, 0);
+		
+			
+			// Clear the character at the current cursor position
+			// Draw a space with the background color (black)
+			for (int y = fb_cursor_y; y < fb_cursor_y + (8 * scale); y++) {
+				for (int x = fb_cursor_x; x < fb_cursor_x + (8 * scale); x++) {
+					if (x < fb->Width && y < fb->Height) {
+						fbDrawPixel(x, y, 0x00000000);
+					}
 				}
 			}
 		}
@@ -214,6 +220,8 @@ void fbPrintChar(char c, uint32_t color, int scale) {
 		// Use the current color if no specific color is provided
 		uint32_t draw_color = (color == 0xFFFFFFFF) ? current_color : color;
 		fbDrawChar(c, fb_cursor_x, fb_cursor_y, draw_color, scale);
+		
+		// Move cursor to next position
 		fb_cursor_x += char_width;
 	}
 }

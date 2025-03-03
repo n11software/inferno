@@ -54,30 +54,54 @@ void readSerial(char* buffer, int length) {
 	int index = 0;
 	while (index < length - 1) {
 		char c = AwaitSerialResponse();
+		
+		// Debug output for every key
+		// kprintf("[DEBUG] Received key: 0x%x ('%c')\n", c, c >= 32 && c < 127 ? c : '?');
+		
 		if (c == '\r') {
+			// Add newline at end of input
+			kprintf("\n");
 			buffer[index] = '\0';
 			break;
-		} else if (c == '\b' && index > 0) {
+		} else if ((c == '\b' || c == 0x7F) && index > 0) {  // Handle both 0x08 and 0x7F as backspace
+			// Handle backspace - remove previous character from buffer
 			index--;
-			kputchar('\b');
-		} else {
+			
+			// FORCE visible backspace effect by using direct terminal control
+			kprintf("\x08 \x08"); // Send backspace, space, backspace directly to output
+			
+		} else if (c >= 32 && c < 127) { // Only accept printable characters
+			// Regular character - add to buffer
 			buffer[index++] = c;
-			kputchar(c);
+			kprintf("%c", c); // Print directly to avoid kputchar's broken backspace handling
 		}
 	}
 	buffer[index] = '\0';
 }
 
 void kputchar(char a) {
-	// Output to serial port
-	if (COM1Active) {
-		while (SerialWait() == 0);
-		outb(0x3f8, a);
+	// For terminal output over serial
+	if (a) {
+		if (a == '\b') {
+			// For backspace, send a proper backspace sequence to the terminal
+			while (SerialWait() == 0);
+			outb(0x3f8, '\b');
+			while (SerialWait() == 0);
+			outb(0x3f8, ' ');
+			while (SerialWait() == 0);
+			outb(0x3f8, '\b');
+		} else {
+			// For all other characters
+			while (SerialWait() == 0);
+			outb(0x3f8, a);
+		}
 	}
 	
 	// Also output to screen if framebuffer is available
 	if (fb_->Width > 720) fbPrintChar(a, 0xFFFFFFFF, 2);  // Add default color and scale arguments
 	else fbPrintChar(a, 0xFFFFFFFF, 1);  // Add default color and scale arguments
+	
+	// Handle special characters
 	if (a == '\n') kputchar('\r');  // Handle newline character
 }
 

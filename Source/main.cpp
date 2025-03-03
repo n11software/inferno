@@ -298,6 +298,13 @@ void TestVirtualMemoryMapping() {
 }
 
 void processCommand(const char* command) {
+    // Debug the entire command as received
+    kprintf("\n[DEBUG] Processing command: ");
+    for (int i = 0; command[i]; i++) {
+        kprintf("0x%x ", command[i]);
+    }
+    kprintf("\n");
+    
     if (strcmp(command, "shutdown") == 0) {
         kprintf("\nShutting down...\n");
         ACPI::shutdown();
