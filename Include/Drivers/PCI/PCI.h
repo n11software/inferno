@@ -26,6 +26,13 @@ namespace PCI {
 	uint16_t read_word(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offset);
 
 	uint16_t get_vendor_id(uint16_t bus, uint16_t dev, uint16_t func);
+	uint16_t get_device_id(uint16_t bus, uint16_t dev, uint16_t func);
+	uint16_t get_class_id(uint16_t bus, uint16_t dev, uint16_t func);
+	uint16_t get_subclass_id(uint16_t bus, uint16_t dev, uint16_t func);
+	
+	// New function to read a PCI BAR register (Base Address Register)
+	uint32_t read_bar(uint16_t bus, uint16_t dev, uint16_t func, uint16_t bar_num);
+	
 	void check_device(uint16_t bus, uint16_t dev);
 	void check_bus(uint16_t bus);
 

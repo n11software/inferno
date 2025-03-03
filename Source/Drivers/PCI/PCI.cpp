@@ -46,8 +46,10 @@ namespace PCI {
 			prInfo("pci", "Found NVMe device");
 			nvme_init(vendor_id, device_id);
 		} else if (class_id == 0x01 && subclass_id == 0x06) {
-			prInfo("pci", "Found AHCI SATA device");
-			ahci_init(vendor_id, device_id);
+			prInfo("pci", "Found AHCI SATA device (VendorID: 0x%04x, DeviceID: 0x%04x)", 
+			       vendor_id, device_id);
+			int sata_devices = ahci_init(vendor_id, device_id, bus, dev, 0);
+			prInfo("pci", "AHCI initialization returned %d SATA devices", sata_devices);
 		}
 
 		device.vendor_id = vendor_id;
@@ -55,8 +57,24 @@ namespace PCI {
 		device.class_id = class_id;
 		device.subclass_id = subclass_id;
 
-		prDebug("PCI", "Detected device: %x:%x (Class %d, Subclass %d)",
-				vendor_id, device_id, class_id, subclass_id);
+		// Print more detailed info about device types
+		const char* device_type = "Unknown";
+		if (class_id == 0x01) {
+			if (subclass_id == 0x06) device_type = "SATA AHCI Controller";
+			else if (subclass_id == 0x08) device_type = "NVMe Controller";
+			else device_type = "Mass Storage Controller";
+		} else if (class_id == 0x02) {
+			device_type = "Network Controller";
+		} else if (class_id == 0x03) {
+			device_type = "Display Controller";
+		} else if (class_id == 0x04) {
+			device_type = "Multimedia Controller";
+		} else if (class_id == 0x0C && subclass_id == 0x03) {
+			device_type = "USB Controller";
+		}
+
+		prDebug("PCI", "Detected %s: %04x:%04x (Class %d, Subclass %d)",
+				device_type, vendor_id, device_id, class_id, subclass_id);
 	}
 
 	void check_bus(uint16_t bus) {

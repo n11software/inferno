@@ -43,6 +43,9 @@
 // Forward declaration for our helper function
 bool DirectCreateMapping(uint64_t cr3, uint64_t virtAddr, uint64_t physAddr);
 
+// Forward declaration for SATA driver test function
+extern "C" void test_sata_driver();
+
 extern unsigned long long _InfernoEnd;
 extern unsigned long long _InfernoStart;
 
@@ -50,6 +53,8 @@ extern "C" {
 	void* malloc(size_t);
 	void free(void*);
 }
+
+#include <Drivers/Storage/AHCI/AHCI.h>
 
 __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	// init fb
@@ -199,11 +204,12 @@ current_position:
 		} else {
 			prErr("kernel", "HPET init failed...");
 		}
+        
+        // Initialize PCI devices first - this will automatically detect AHCI controllers
+        PCI::init();
 	} else {
 		prErr("kernel", "ACPI initalization failed.");
 	}
-
-	PCI::init();
 
 	//PS2::init();
 
@@ -305,9 +311,34 @@ void processCommand(const char* command) {
     }
     kprintf("\n");
     
-    if (strcmp(command, "shutdown") == 0) {
+    if (strcmp(command, "shutdown") == 0 || strcmp(command, "exit") == 0) {
         kprintf("\nShutting down...\n");
         ACPI::shutdown();
+    } else if (strcmp(command, "sata") == 0 || strcmp(command, "ahci") == 0) {
+        kprintf("\nRunning SATA driver test...\n");
+        test_sata_driver();
+    } else if (strcmp(command, "fs") == 0) {
+        kprintf("\nDetecting filesystem on SATA device...\n");
+        
+        // Find the first available device
+        int port_num = -1;
+        for (int i = 0; i < AHCI_MAX_PORTS; i++) {
+            ahci_device_t* dev = ahci_get_device_info(i);
+            if (dev && dev->is_present) {
+                port_num = i;
+                kprintf("Found device on port %d\n", i);
+                break;
+            }
+        }
+        
+        if (port_num >= 0) {
+            int fs_type = ahci_detect_filesystem(port_num);
+            if (fs_type < 0) {
+                kprintf("Failed to detect filesystem\n");
+            }
+        } else {
+            kprintf("No SATA devices found\n");
+        }
     } else {
         kprintf("\nUnknown command: %s\n", command);
     }
