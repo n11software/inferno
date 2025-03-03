@@ -15,6 +15,7 @@
 #include <CPU/CPU.h>
 #include <CPU/GDT.h>
 #include <Inferno/IO.h>
+#include <Inferno/string.h>
 #include <Interrupts/APIC.hpp>
 #include <Interrupts/DoublePageFault.hpp>
 #include <Interrupts/Interrupts.hpp>
@@ -296,6 +297,15 @@ void TestVirtualMemoryMapping() {
     Paging::UnmapPage(virtAddr2);
 }
 
+void processCommand(const char* command) {
+    if (strcmp(command, "shutdown") == 0) {
+        kprintf("\nShutting down...\n");
+        ACPI::shutdown();
+    } else {
+        kprintf("\nUnknown command: %s\n", command);
+    }
+}
+
 __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
     unsigned long long timeNow = RTC::getEpochTime();
     SetFramebuffer(bob->framebuffer);
@@ -397,13 +407,15 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
         prErr("kernel", "Virtual memory aliasing test FAILED");
     }
 
-	    // Buffer to store user input
+    // Buffer to store user input
     char inputBuffer[256];
 
-    // Read user input from serial port
-    kprintf("$ ");
-    readSerial(inputBuffer, sizeof(inputBuffer));
-    kprintf("\nYou entered: %s\n", inputBuffer);
+    // Command prompt loop
+    while (true) {
+        kprintf("$ ");
+        readSerial(inputBuffer, sizeof(inputBuffer));
+        processCommand(inputBuffer);
+    }
 
     // Fall back to halt loop if ACPI shutdown fails
     while (true) asm("hlt");
