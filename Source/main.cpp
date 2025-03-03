@@ -36,6 +36,7 @@
 #include <Drivers/ACPI/acpi.h>
 #include <Drivers/RTC/RTC.h>
 #include <Drivers/PCI/PCI.h>
+#include <Drivers/PS2/ps2.h>
 
 // Forward declaration for our helper function
 bool DirectCreateMapping(uint64_t cr3, uint64_t virtAddr, uint64_t physAddr);
@@ -201,6 +202,8 @@ current_position:
 	}
 
 	PCI::init();
+
+	PS2::init();
 
 	// Usermode
 	#if EnableGDT == true

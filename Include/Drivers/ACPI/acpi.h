@@ -17,6 +17,8 @@ namespace ACPI {
     // ACPI power management functions
     bool shutdown();
     bool reboot();
+
+	bool checkForPS2Controller();
     
     // Structure definitions for ACPI tables
     struct RSDPDescriptor {

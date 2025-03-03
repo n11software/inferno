@@ -310,4 +310,15 @@ namespace ACPI {
         
         return nullptr;
     }
+
+	bool checkForPS2Controller() {
+		if (facp->IAPC_BOOT_ARCH & 0x01) {
+			prDebug("acpi", "IPAC_BOOT_ARCH reports ps2 controller found");
+			return true;
+		} else {
+			prDebug("acpi", "IPAC_BOOT_ARCH reports ps2 controller not found");
+			return false;
+		}
+	}
+
 }
