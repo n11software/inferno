@@ -52,7 +52,7 @@ extern unsigned long long _InfernoEnd;
 extern unsigned long long _InfernoStart;
 
 extern "C" {
-	void* malloc(size_t);
+	void *malloc(size_t);
 	void free(void*);
 }
 
@@ -249,6 +249,111 @@ void TestVirtualMemoryMapping() {
     Paging::UnmapPage(virtAddr2);
 }
 
+// Split a string by space and get the specified part
+// Returns true if the part exists, false otherwise
+bool getCommandPart(const char* command, int part_index, char* result, int max_length) {
+    if (!command || !result || part_index < 0 || max_length <= 0) {
+        return false;
+    }
+    
+    // Initialize result to empty string
+    result[0] = '\0';
+    
+    int current_part = 0;
+    int result_pos = 0;
+    bool in_word = false;
+    
+    // Process each character
+    for (int i = 0; command[i] != '\0'; i++) {
+        if (command[i] == ' ' || command[i] == '\t') {
+            // Space found, end current word if we were in one
+            if (in_word) {
+                if (current_part == part_index) {
+                    // If we were collecting the desired part, terminate it
+                    result[result_pos] = '\0';
+                    return true;
+                }
+                in_word = false;
+                current_part++;
+            }
+        } else {
+            // Non-space character found
+            if (!in_word) {
+                // Start of a new word
+                in_word = true;
+                // Reset result position if this is the part we want
+                if (current_part == part_index) {
+                    result_pos = 0;
+                }
+            }
+            
+            // If this is the part we're looking for, add the character
+            if (current_part == part_index && result_pos < max_length - 1) {
+                result[result_pos++] = command[i];
+            }
+        }
+    }
+    
+    // Check if we ended while collecting the desired part
+    if (in_word && current_part == part_index) {
+        result[result_pos] = '\0';
+        return true;
+    }
+    
+    return false;
+}
+
+// Helper function to print a hexdump of binary data
+void print_hexdump(const void* data, size_t size) {
+    const unsigned char* buf = (const unsigned char*)data;
+    char ascii[17];
+    size_t i, j;
+    
+    // Process every byte in the data
+    for (i = 0; i < size; i++) {
+        // Print offset at the beginning of each line (16 bytes)
+        if (i % 16 == 0) {
+            // Print ASCII representation of previous line
+            if (i != 0) {
+                kprintf("  %s\n", ascii);
+            }
+            
+            // Print current offset
+            kprintf("  %04x:", (unsigned int)i);
+        }
+        
+        // Print hex representation of current byte
+        kprintf(" %02x", buf[i]);
+        
+        // Store ASCII representation (if printable, otherwise a dot)
+        if (buf[i] >= 32 && buf[i] <= 126) {
+            ascii[i % 16] = buf[i];
+        } else {
+            ascii[i % 16] = '.';
+        }
+        ascii[(i % 16) + 1] = '\0';
+        
+        // Print a space after 8 bytes for readability
+        if ((i + 1) % 8 == 0 && (i + 1) % 16 != 0) {
+            kprintf(" ");
+        }
+    }
+    
+    // Print padding spaces if the last line is not complete
+    if (size % 16 != 0) {
+        j = 16 - (size % 16);
+        for (i = 0; i < j; i++) {
+            kprintf("   ");
+            if ((i + 1) % 8 == 0 && (i + 1) % 16 != 0) {
+                kprintf(" ");
+            }
+        }
+    }
+    
+    // Print ASCII representation of the last line
+    kprintf("  %s\n", ascii);
+}
+
 void processCommand(const char* command) {
     // Debug the entire command as received
     // kprintf("\n[DEBUG] Processing command: ");
@@ -358,7 +463,76 @@ void processCommand(const char* command) {
         } else {
             kprintf("No SATA devices found\n");
         }
-    } else if (strcmp(command, "ls") == 0) {
+    } else if (strcmp(command, "ext2-dir") == 0) {
+        kprintf("\nTesting EXT2 directory inode lookup for /usr/...\n");
+        
+        // Find the first available device
+        int port_num = -1;
+        for (int i = 0; i < AHCI_MAX_PORTS; i++) {
+            ahci_device_t* dev = ahci_get_device_info(i);
+            if (dev && dev->is_present) {
+                port_num = i;
+                kprintf("Using device on port %d\n", i);
+                break;
+            }
+        }
+        
+        if (port_num >= 0) {
+            // Initialize EXT2 if not already done
+            if (!FS::EXT2::Initialize(port_num)) {
+                kprintf("Failed to initialize EXT2 filesystem\n");
+            } else {
+                kprintf("EXT2 filesystem initialized successfully\n");
+                
+                // Try to find /usr/ directory
+                uint32_t usr_inode = 0;
+                if (FS::EXT2::GetDirectoryInode(port_num, "/usr/", &usr_inode)) {
+                    kprintf("Found /usr/ directory with inode: %u\n", usr_inode);
+                    
+                    // List the contents of the /usr/ directory
+                    if (FS::EXT2::ListDirectory(port_num, usr_inode)) {
+                        kprintf("Successfully listed /usr/ directory contents\n");
+                    } else {
+                        kprintf("Failed to list /usr/ directory contents\n");
+                    }
+                } else {
+                    kprintf("Failed to find /usr/ directory\n");
+                    
+                    // Try without trailing slash
+                    if (FS::EXT2::GetDirectoryInode(port_num, "/usr", &usr_inode)) {
+                        kprintf("Found /usr directory with inode: %u\n", usr_inode);
+                        
+                        // List the contents
+                        if (FS::EXT2::ListDirectory(port_num, usr_inode)) {
+                            kprintf("Successfully listed /usr directory contents\n");
+                        } else {
+                            kprintf("Failed to list /usr directory contents\n");
+                        }
+                    } else {
+                        kprintf("Failed to find /usr directory, listing root instead\n");
+                        
+                        // List the root directory to see what's available
+                        if (FS::EXT2::ReadRootDirectory(port_num)) {
+                            kprintf("Successfully listed root directory contents\n");
+                        } else {
+                            kprintf("Failed to list root directory contents\n");
+                        }
+                    }
+                }
+            }
+        } else {
+            kprintf("No SATA devices found\n");
+        }
+    } else if (strncmp(command, "ls", 2) == 0 && (command[2] == '\0' || command[2] == ' ')) {
+        kprintf("\nListing directory contents...\n");
+        
+        // Get the path argument if provided
+        char path[256] = {0};
+        if (!getCommandPart(command, 1, path, sizeof(path))) {
+            // If no path provided, use root directory
+            strcpy(path, "/");
+        }
+        
         // Find the first available device
         int port_num = -1;
         for (int i = 0; i < AHCI_MAX_PORTS; i++) {
@@ -370,95 +544,182 @@ void processCommand(const char* command) {
         }
         
         if (port_num >= 0) {
-            // Try to detect the filesystem type
-            int fs_type = ahci_detect_filesystem(port_num);
-            
-            // If it's an EXT2 filesystem (or we're assuming it for testing)
-            if (fs_type == FS_TYPE_EXT2 || fs_type == FS_TYPE_EXT4) {
-                // kprintf("Found EXT2/EXT4 filesystem (type: %d)\n", fs_type);
-                // kprintf("Attempting to initialize EXT2 filesystem...\n");
-                
-                // Attempt to initialize the filesystem
-                if (!FS::EXT2::Initialize(port_num)) {
-                    kprintf("Standard initialization failed, testing different options...\n");
-                    
-                    // If standard initialization fails, let's try a direct sector read
-                    ahci_device_t* device = ahci_get_device_info(port_num);
-                    
-                    // Ensure valid sector size
-                    uint32_t sector_size = device->sector_size;
-                    if (sector_size == 0) {
-                        kprintf("Invalid sector size, using default 512 bytes\n");
-                        sector_size = 512;
-                    }
-                    
-                    // Try reading the first few sectors directly
-                    void* buffer = malloc(sector_size * 4);  // Read 4 sectors
-                    if (buffer) {
-                        memset(buffer, 0, sector_size * 4);
-                        kprintf("Reading first 4 sectors directly...\n");
-                        
-                        int result = ahci_read_sectors(port_num, 0, 4, buffer);
-                        if (result == 0) {
-                            kprintf("Successfully read first 4 sectors\n");
-                            
-                            // Dump the first 32 bytes for debugging
-                            uint8_t* bytes = (uint8_t*)buffer;
-                            kprintf("First 32 bytes of disk:\n");
-                            for (int i = 0; i < 32; i++) {
-                                kprintf("%02x ", bytes[i]);
-                                if ((i + 1) % 16 == 0) kprintf("\n");
-                            }
-                            kprintf("\n");
-                            
-                            // Look for filesystem signatures
-                            if (bytes[510] == 0x55 && bytes[511] == 0xAA) {
-                                kprintf("Found boot sector signature (55 AA) at offset 510\n");
-                            }
-                        } else {
-                            kprintf("Failed to read sectors, error: %d\n", result);
-                        }
-                        free(buffer);
-                    }
-                    
-                    kprintf("Failed to initialize EXT2 filesystem\n");
-                } else {
-                    // kprintf("EXT2 filesystem initialized successfully\n");
-                    
-                    // Attempt to read and list the root directory
-                    // if (!FS::EXT2::ReadRootDirectory(port_num)) {
-                    //     kprintf("Failed to read root directory\n");
-                    // }
-                }
+            // Try to initialize the EXT2 filesystem if not already done
+            if (!FS::EXT2::Initialize(port_num)) {
+                kprintf("Failed to initialize EXT2 filesystem\n");
             } else {
-                if (fs_type < 0) {
-                    kprintf("Failed to detect filesystem (error: %d)\n", fs_type);
+                kprintf("Listing contents of '%s':\n", path);
+                
+                // If it's the root directory
+                if (strcmp(path, "/") == 0) {
+                    if (!FS::EXT2::ReadRootDirectory(port_num)) {
+                        kprintf("Failed to read root directory\n");
+                    }
                 } else {
-                    kprintf("Filesystem type %d not supported by ls command\n", fs_type);
-                    
-                    // Print the detected filesystem type
-                    switch (fs_type) {
-                        case FS_TYPE_FAT:
-                            kprintf("Detected FAT filesystem (generic)\n");
-                            break;
-                        case FS_TYPE_FAT12:
-                            kprintf("Detected FAT12 filesystem\n");
-                            break;
-                        case FS_TYPE_FAT16:
-                            kprintf("Detected FAT16 filesystem\n");
-                            break;
-                        case FS_TYPE_FAT32:
-                            kprintf("Detected FAT32 filesystem\n");
-                            break;
-                        default:
-                            kprintf("Unknown filesystem type: %d\n", fs_type);
-                            break;
+                    // Get the inode of the specified directory
+                    uint32_t dir_inode = 0;
+                    if (FS::EXT2::GetDirectoryInode(port_num, path, &dir_inode)) {
+                        if (!FS::EXT2::ListDirectory(port_num, dir_inode)) {
+                            kprintf("Failed to list contents of '%s'\n", path);
+                        }
+                    } else {
+                        kprintf("Directory '%s' not found\n", path);
                     }
                 }
             }
         } else {
             kprintf("No SATA devices found\n");
         }
+    } else if (strncmp(command, "cd ", 3) == 0) {
+        const char* path = command + 3; // Skip "cd " prefix
+        
+        kprintf("\nLooking up directory: %s\n", path);
+        
+        // Find the first available device
+        int port_num = -1;
+        for (int i = 0; i < AHCI_MAX_PORTS; i++) {
+            ahci_device_t* dev = ahci_get_device_info(i);
+            if (dev && dev->is_present) {
+                port_num = i;
+                kprintf("Using device on port %d\n", i);
+                break;
+            }
+        }
+        
+        if (port_num >= 0) {
+            // Initialize EXT2 if not already done
+            if (!FS::EXT2::Initialize(port_num)) {
+                kprintf("Failed to initialize EXT2 filesystem\n");
+            } else {
+                // Try to find the specified directory
+                uint32_t dir_inode = 0;
+                if (FS::EXT2::GetDirectoryInode(port_num, path, &dir_inode)) {
+                    kprintf("Found directory '%s' with inode: %u\n", path, dir_inode);
+                    
+                    // List the contents of the directory
+                    if (FS::EXT2::ListDirectory(port_num, dir_inode)) {
+                        kprintf("Successfully listed contents of '%s'\n", path);
+                    } else {
+                        kprintf("Failed to list contents of '%s'\n", path);
+                    }
+                } else {
+                    kprintf("Failed to find directory '%s'\n", path);
+                }
+            }
+        } else {
+            kprintf("No SATA devices found\n");
+        }
+    } else if (strncmp(command, "cat ", 4) == 0) {
+        // Get the file path argument
+        char filepath[256] = {0};
+        if (!getCommandPart(command, 1, filepath, sizeof(filepath))) {
+            kprintf("\nUsage: cat <filepath>\n");
+            return;
+        }
+        
+        // Check for flags
+        bool hexdump_mode = false;
+        char option[16] = {0};
+        if (getCommandPart(command, 2, option, sizeof(option))) {
+            if (strcmp(option, "-x") == 0 || strcmp(option, "--hex") == 0) {
+                hexdump_mode = true;
+            }
+        }
+        
+        kprintf("\nAttempting to read file: %s\n", filepath);
+        
+        // Find the first available device
+        int port_num = -1;
+        for (int i = 0; i < AHCI_MAX_PORTS; i++) {
+            ahci_device_t* dev = ahci_get_device_info(i);
+            if (dev && dev->is_present) {
+                port_num = i;
+                break;
+            }
+        }
+        
+        if (port_num < 0) {
+            kprintf("No SATA devices found\n");
+            return;
+        }
+        
+        // Initialize the EXT2 filesystem if not already
+        if (!FS::EXT2::Initialize(port_num)) {
+            kprintf("Failed to initialize EXT2 filesystem\n");
+            return;
+        }
+        
+        // Find the file's inode
+        uint32_t file_inode = FS::EXT2::FindFileInode(port_num, filepath);
+        if (file_inode == 0) {
+            kprintf("File '%s' not found\n", filepath);
+            return;
+        }
+        
+        // Allocate a larger buffer for the file content
+        const uint32_t buffer_size = 16384; // 16KB buffer
+        char* file_buffer = (char*)malloc(buffer_size);
+        if (!file_buffer) {
+            kprintf("Failed to allocate memory for file buffer\n");
+            return;
+        }
+        
+        // Read the file contents
+        uint32_t bytes_read = 0;
+        if (!FS::EXT2::ReadFileContents(port_num, file_inode, file_buffer, buffer_size - 1, &bytes_read)) {
+            kprintf("Failed to read file contents\n");
+            free(file_buffer);
+            return;
+        }
+        
+        // Output the file contents
+        kprintf("\n--- File Contents (%u bytes) ---\n", bytes_read);
+        
+        // Ensure the buffer is null-terminated for string operations
+        file_buffer[bytes_read] = '\0';
+        
+        // Use text display by default, use hexdump only when explicitly requested
+        if (hexdump_mode) {
+            kprintf("Displaying in hexdump mode:\n");
+            print_hexdump(file_buffer, bytes_read);
+        } else {
+            // Print as text, character by character to handle all content
+            for (uint32_t i = 0; i < bytes_read; i++) {
+                char c = file_buffer[i];
+                
+                // Handle line endings (LF - Unix style)
+                if (c == '\n') {
+                    kprintf("\n");
+                } else if (c == '\r') {
+                    // Handle CR (in case of CRLF windows endings)
+                    if (i + 1 < bytes_read && file_buffer[i + 1] == '\n') {
+                        // Skip CR in CRLF sequence, LF will be handled in next iteration
+                        continue;
+                    }
+                    // Standalone CR (old Mac style)
+                    kprintf("\n");
+                } else if (c == '\0' && i < bytes_read - 1) {
+                    // Show null bytes within the file
+                    kprintf("\\0");
+                } else if ((unsigned char)c >= 32 && (unsigned char)c <= 126) {
+                    // Printable ASCII
+                    kprintf("%c", c);
+                } else if ((unsigned char)c >= 128) {
+                    // UTF-8 or extended ASCII - just pass through to kprintf
+                    // kprintf should handle displaying UTF-8 if the terminal supports it
+                    kprintf("%c", c);
+                } else {
+                    // Control characters (except newlines) - show as escape sequences
+                    kprintf("\\x%02x", (unsigned char)c);
+                }
+            }
+            kprintf("\n");
+        }
+        
+        kprintf("\n--- End of File ---\n");
+        
+        // Free the buffer
+        free(file_buffer);
     } else {
         kprintf("\nUnknown command: %s\n", command);
     }

@@ -12,4 +12,4 @@
 
 // Forward declare the implementation from Storage/AHCI/AHCI.cpp
 // We don't need to implement it here since it's already defined there
-extern int ahci_init(uint16_t vendor_id, uint16_t device_id, uint16_t bus = 0, uint16_t device = 0, uint16_t function = 0);
+extern int ahci_init(uint16_t vendor_id, uint16_t device_id, uint16_t bus, uint16_t device, uint16_t function);

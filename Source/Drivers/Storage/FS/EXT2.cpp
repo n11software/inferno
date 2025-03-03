@@ -1,5 +1,7 @@
 #include <Drivers/Storage/FS/EXT2.h>
 #include <Drivers/Storage/AHCI/AHCI.h>
+#include <Inferno/Log.h>
+#include <Inferno/string.h> // Added explicit include for string functions
 // Use the standard memory functions from stdlib
 #include <stdint.h>
 #include <Inferno/Log.h>
@@ -8,19 +10,12 @@
 
 #define DEBUG false
 
-// Forward declarations for memory functions
+// Needed string functions and memory functions (imported from C library or kernel functions)
 extern "C" {
     void* malloc(size_t size);
     void free(void* ptr);
     
-    // Simple strcpy implementation
-    char* strcpy(char* dest, const char* src) {
-        char* d = dest;
-        while ((*d++ = *src++) != '\0');
-        return dest;
-    }
-    
-    // Basic sprintf implementation for our needs
+    // Simple sprintf implementation
     int sprintf(char* str, const char* format, ...) {
         va_list args;
         va_start(args, format);
@@ -718,6 +713,336 @@ char* GetFileType(uint8_t type) {
         case EXT2_FT_SYMLINK: return (char*)"Symlink";
         default: return (char*)"Unknown";
     }
+}
+
+// Find the inode number of a directory by its path
+uint32_t FindDirectoryInode(int port_num, const char* path) {
+    // Start at the root directory inode
+    uint32_t current_inode = EXT2_ROOT_INO;
+    
+    // If path is empty or just "/", return the root inode
+    if (!path || !*path || (path[0] == '/' && path[1] == '\0')) {
+        return current_inode;
+    }
+    
+    // Make a copy of the path that we can modify
+    char path_copy[256];
+    strcpy(path_copy, path);
+    
+    // Skip leading slash if present
+    char* current_path = path_copy;
+    if (*current_path == '/') {
+        current_path++;
+    }
+    
+    // Process each path component
+    char* next_component = strtok(current_path, "/");
+    while (next_component) {
+        // Special case: ignore "." (current directory)
+        if (strcmp(next_component, ".") == 0) {
+            next_component = strtok(NULL, "/");
+            continue;
+        }
+        
+        // Special case: ".." (parent directory) - not implemented
+        if (strcmp(next_component, "..") == 0) {
+            prErr("ext2", "'..' navigation not implemented yet");
+            return 0;
+        }
+        
+        // Read the current directory inode
+        ext2_inode_t* inode = ReadInode(port_num, current_inode);
+        if (!inode) {
+            prErr("ext2", "Failed to read inode %u when looking for '%s'", current_inode, next_component);
+            return 0;
+        }
+        
+        // Check if it's a directory
+        if (!(inode->mode & EXT2_S_IFDIR)) {
+            prErr("ext2", "Inode %u is not a directory", current_inode);
+            free(inode);
+            return 0;
+        }
+        
+        // Search for the next component in the current directory
+        bool found = false;
+        uint32_t next_inode = 0;
+        
+        // Read directory entries from direct blocks
+        uint32_t remaining_size = inode->size;
+        uint32_t block_index = 0;
+        
+        while (remaining_size > 0 && block_index < 12 && !found) {
+            void* block_data = ReadInodeData(port_num, inode, block_index);
+            if (!block_data) {
+                free(inode);
+                return 0;
+            }
+            
+            uint32_t offset = 0;
+            while (offset < block_size && offset < remaining_size && !found) {
+                ext2_dir_entry_t* entry = (ext2_dir_entry_t*)((char*)block_data + offset);
+                if (entry->inode != 0) {
+                    // Compare entry name with the path component
+                    if (entry->name_len == strlen(next_component)) {
+                        bool name_matches = true;
+                        for (int i = 0; i < entry->name_len; i++) {
+                            if (entry->name[i] != next_component[i]) {
+                                name_matches = false;
+                                break;
+                            }
+                        }
+                        
+                        if (name_matches) {
+                            next_inode = entry->inode;
+                            found = true;
+                        }
+                    }
+                }
+                
+                offset += entry->rec_len;
+            }
+            
+            block_index++;
+            remaining_size -= (remaining_size > block_size) ? block_size : remaining_size;
+            free(block_data);
+        }
+        
+        // Free the inode
+        free(inode);
+        
+        if (!found) {
+            prErr("ext2", "Directory entry '%s' not found", next_component);
+            return 0;
+        }
+        
+        // Update current inode and move to next component
+        current_inode = next_inode;
+        next_component = strtok(NULL, "/");
+    }
+    
+    return current_inode;
+}
+
+// Check if a directory exists and get its inode if it does
+bool GetDirectoryInode(int port_num, const char* path, uint32_t* out_inode) {
+    if (!path || !out_inode) {
+        return false;
+    }
+    
+    uint32_t inode = FindDirectoryInode(port_num, path);
+    if (inode == 0) {
+        return false;
+    }
+    
+    // Verify that the inode is actually a directory
+    ext2_inode_t* inode_struct = ReadInode(port_num, inode);
+    if (!inode_struct) {
+        return false;
+    }
+    
+    bool is_dir = (inode_struct->mode & EXT2_S_IFDIR) != 0;
+    free(inode_struct);
+    
+    if (!is_dir) {
+        prErr("ext2", "Path '%s' is not a directory", path);
+        return false;
+    }
+    
+    *out_inode = inode;
+    return true;
+}
+
+// Find the inode number of a file by its path
+uint32_t FindFileInode(int port_num, const char* path) {
+    if (!path || !*path) {
+        return 0;
+    }
+    
+    // Make a copy of the path that we can modify
+    char path_copy[256];
+    strcpy(path_copy, path);
+    
+    // Extract the directory path and filename
+    char* last_slash = strrchr(path_copy, '/');
+    if (!last_slash) {
+        // No slash in path, assume it's a file in the root directory
+        last_slash = path_copy;
+        *last_slash = '\0'; // Empty string for directory
+        strcpy(path_copy, "/"); // Root directory
+    } else {
+        *last_slash = '\0'; // Split the string
+    }
+    
+    const char* dir_path = path_copy;
+    const char* filename = last_slash + 1;
+    
+    // Empty filename means the path ends with a slash, which is a directory
+    if (!*filename) {
+        prErr("ext2", "Path '%s' appears to be a directory, not a file", path);
+        return 0;
+    }
+    
+    // Find the parent directory's inode
+    uint32_t dir_inode;
+    if (strcmp(dir_path, "/") == 0) {
+        // Root directory
+        dir_inode = EXT2_ROOT_INO;
+    } else {
+        dir_inode = FindDirectoryInode(port_num, dir_path);
+    }
+    
+    if (dir_inode == 0) {
+        prErr("ext2", "Parent directory '%s' not found", dir_path);
+        return 0;
+    }
+    
+    // Read the directory inode
+    ext2_inode_t* inode = ReadInode(port_num, dir_inode);
+    if (!inode) {
+        prErr("ext2", "Failed to read directory inode %u", dir_inode);
+        return 0;
+    }
+    
+    // Check if it's a directory
+    if (!(inode->mode & EXT2_S_IFDIR)) {
+        prErr("ext2", "Inode %u is not a directory", dir_inode);
+        free(inode);
+        return 0;
+    }
+    
+    // Search for the filename in the directory
+    uint32_t file_inode = 0;
+    uint32_t remaining_size = inode->size;
+    uint32_t block_index = 0;
+    
+    while (remaining_size > 0 && block_index < 12 && file_inode == 0) {
+        void* block_data = ReadInodeData(port_num, inode, block_index);
+        if (!block_data) {
+            free(inode);
+            return 0;
+        }
+        
+        uint32_t offset = 0;
+        while (offset < block_size && offset < remaining_size && file_inode == 0) {
+            ext2_dir_entry_t* entry = (ext2_dir_entry_t*)((char*)block_data + offset);
+            if (entry->inode != 0) {
+                // Compare entry name with the filename
+                if (entry->name_len == strlen(filename)) {
+                    bool name_matches = true;
+                    for (int i = 0; i < entry->name_len; i++) {
+                        if (entry->name[i] != filename[i]) {
+                            name_matches = false;
+                            break;
+                        }
+                    }
+                    
+                    if (name_matches) {
+                        file_inode = entry->inode;
+                    }
+                }
+            }
+            
+            offset += entry->rec_len;
+        }
+        
+        block_index++;
+        remaining_size -= (remaining_size > block_size) ? block_size : remaining_size;
+        free(block_data);
+    }
+    
+    // Free the inode
+    free(inode);
+    
+    if (file_inode == 0) {
+        prErr("ext2", "File '%s' not found", filename);
+    }
+    
+    return file_inode;
+}
+
+// Read the contents of a file
+bool ReadFileContents(int port_num, uint32_t inode_num, char* buffer, uint32_t buffer_size, uint32_t* bytes_read) {
+    if (!buffer || buffer_size == 0 || !bytes_read) {
+        return false;
+    }
+    
+    // Initialize bytes read
+    *bytes_read = 0;
+    
+    // Read the file inode
+    ext2_inode_t* inode = ReadInode(port_num, inode_num);
+    if (!inode) {
+        prErr("ext2", "Failed to read file inode %u", inode_num);
+        return false;
+    }
+    
+    // Check if it's a regular file
+    if (!(inode->mode & EXT2_S_IFREG)) {
+        prErr("ext2", "Inode %u is not a regular file", inode_num);
+        free(inode);
+        return false;
+    }
+    
+    // Debug output
+    prInfo("ext2", "File size: %u bytes", inode->size);
+    
+    // Determine how much we can read
+    uint32_t size_to_read = (inode->size < buffer_size) ? inode->size : buffer_size;
+    
+    // Read from direct blocks
+    uint32_t remaining_to_read = size_to_read;
+    uint32_t bytes_read_so_far = 0;
+    uint32_t block_index = 0;
+    
+    while (remaining_to_read > 0 && block_index < 12) {
+        void* block_data = ReadInodeData(port_num, inode, block_index);
+        if (!block_data) {
+            // If we can't read a block but have already read some data, return what we have
+            if (bytes_read_so_far > 0) {
+                *bytes_read = bytes_read_so_far;
+                free(inode);
+                return true;
+            }
+            
+            prErr("ext2", "Failed to read block %u of file inode %u", block_index, inode_num);
+            free(inode);
+            return false;
+        }
+        
+        // Calculate how much to copy from this block
+        uint32_t block_bytes_to_read = (remaining_to_read < block_size) ? remaining_to_read : block_size;
+        
+        // Debug output
+        prInfo("ext2", "Reading %u bytes from block %u", block_bytes_to_read, block_index);
+        
+        // Copy the data to the output buffer
+        memcpy(buffer + bytes_read_so_far, block_data, block_bytes_to_read);
+        
+        // Update counters
+        bytes_read_so_far += block_bytes_to_read;
+        remaining_to_read -= block_bytes_to_read;
+        block_index++;
+        
+        // Free the block data
+        free(block_data);
+    }
+    
+    // Handle singly indirect blocks if needed (future implementation)
+    if (remaining_to_read > 0 && inode->block[12] != 0) {
+        prErr("ext2", "Indirect blocks not implemented yet");
+    }
+    
+    // Free the inode
+    free(inode);
+    
+    // Update bytes read
+    *bytes_read = bytes_read_so_far;
+    
+    // Debug output
+    prInfo("ext2", "Read %u bytes from file inode %u", bytes_read_so_far, inode_num);
+    
+    return true;
 }
 
 } // namespace EXT2

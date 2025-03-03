@@ -137,10 +137,14 @@ typedef struct {
 
 // Function prototypes
 bool Initialize(int port_num);
-bool ReadSuperblock(int port_num);
+bool ReadSuperblock(int port_num, uint32_t sector_offset);
 bool ReadBlockGroupDescriptors(int port_num);
 bool ReadRootDirectory(int port_num);
 bool ListDirectory(int port_num, uint32_t inode_num);
+uint32_t FindDirectoryInode(int port_num, const char* path);
+bool GetDirectoryInode(int port_num, const char* path, uint32_t* out_inode);
+uint32_t FindFileInode(int port_num, const char* path);
+bool ReadFileContents(int port_num, uint32_t inode_num, char* buffer, uint32_t buffer_size, uint32_t* bytes_read);
 char* GetFileType(uint8_t type);
 
 } // namespace EXT2
