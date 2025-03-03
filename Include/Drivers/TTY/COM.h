@@ -17,3 +17,4 @@ char AwaitSerialResponse();
 void kputchar(char a);
 int kprintf(const char* fmt, ...);
 void initFB(Framebuffer* fb);
+void readSerial(char* buffer, int length);

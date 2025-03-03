@@ -397,6 +397,14 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
         prErr("kernel", "Virtual memory aliasing test FAILED");
     }
 
+	    // Buffer to store user input
+    char inputBuffer[256];
+
+    // Read user input from serial port
+    kprintf("$ ");
+    readSerial(inputBuffer, sizeof(inputBuffer));
+    kprintf("\nYou entered: %s\n", inputBuffer);
+
     // Fall back to halt loop if ACPI shutdown fails
     while (true) asm("hlt");
 }

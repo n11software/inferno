@@ -50,6 +50,24 @@ int SerialWait() { return inb(0x3f8 + 5) & 0x20; }
 // Forward declaration of the fb_PrintChar function
 extern void fbPrintChar(char c, uint32_t color, int scale);
 
+void readSerial(char* buffer, int length) {
+	int index = 0;
+	while (index < length - 1) {
+		char c = AwaitSerialResponse();
+		if (c == '\r') {
+			buffer[index] = '\0';
+			break;
+		} else if (c == '\b' && index > 0) {
+			index--;
+			kputchar('\b');
+		} else {
+			buffer[index++] = c;
+			kputchar(c);
+		}
+	}
+	buffer[index] = '\0';
+}
+
 void kputchar(char a) {
 	// Output to serial port
 	if (COM1Active) {
@@ -60,6 +78,7 @@ void kputchar(char a) {
 	// Also output to screen if framebuffer is available
 	if (fb_->Width > 720) fbPrintChar(a, 0xFFFFFFFF, 2);  // Add default color and scale arguments
 	else fbPrintChar(a, 0xFFFFFFFF, 1);  // Add default color and scale arguments
+	if (a == '\n') kputchar('\r');  // Handle newline character
 }
 
 char* strchr(const char* str, int c) {
