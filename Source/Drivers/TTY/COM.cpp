@@ -196,7 +196,8 @@ void _print(PrintData* pd, const char* str) {
 }
 
 void _kprintf(PrintData* pd, const char* prefix, const char* prefix2, const char* str) {
-	int len = strlen(prefix) + strlen(prefix2) + strlen(str);
+	int len = strlen(str);
+	if (pd->baseprefix) len += strlen(prefix) + strlen(prefix2);
 	int spaces = pd->spacing;
 	if (spaces > len) spaces -= len;
 	else spaces = 0;
@@ -244,7 +245,10 @@ int kprintf(const char* fmt, ...) {
 						pd.fill = '0';
 					break;
 				default:
-					pd.spacing *= 10 + (fmt[i] - '0');
+					if (pd.spacing == 0)
+						pd.spacing = fmt[i] - '0';
+					else
+						pd.spacing = pd.spacing * 10 + (fmt[i] - '0');
 					break;
 			}
 		} else if (strchr("doupx", fmt[i])) {

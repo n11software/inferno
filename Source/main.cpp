@@ -39,6 +39,8 @@
 #include <Drivers/RTC/RTC.h>
 #include <Drivers/PCI/PCI.h>
 #include <Drivers/PS2/ps2.h>
+#include <Drivers/Storage/AHCI/AHCI.h>
+#include <Drivers/Storage/FS/EXT2.h>
 
 // Forward declaration for our helper function
 bool DirectCreateMapping(uint64_t cr3, uint64_t virtAddr, uint64_t physAddr);
@@ -53,8 +55,6 @@ extern "C" {
 	void* malloc(size_t);
 	void free(void*);
 }
-
-#include <Drivers/Storage/AHCI/AHCI.h>
 
 __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 	// init fb
@@ -95,7 +95,7 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 		// Round up to page size
 		fbSize = ((fbSize + 0xFFF) & ~0xFFF);
 		
-		prInfo("paging", "Mapping framebuffer at 0x%x, size: 0x%x", fbAddr, fbSize);
+		// prInfo("paging", "Mapping framebuffer at 0x%x, size: 0x%x", fbAddr, fbSize);
 		
 		// Map each page of the framebuffer
 		for (uint64_t offset = 0; offset < fbSize; offset += 0x1000) {
@@ -103,15 +103,8 @@ __attribute__((sysv_abi)) void Inferno(BOB* bob) {
 		}
 	}
 	
-	// Map a test page - but farther away from kernel and tables
-	uint64_t testPhysAddr = 0x1000000; // 16MB mark, should be unused
-	uint64_t testVirtAddr = 0x1400000; // 20MB mark, should be unmapped
-	
-	prInfo("paging", "Mapping test page: virtual 0x%x -> physical 0x%x", testVirtAddr, testPhysAddr);
-	Paging::MapPage(testVirtAddr, testPhysAddr);
-	
 	// Enable paging with careful preparation 
-	prInfo("kernel", "Preparing to enable paging, current code at %p", (void*)&&current_position);
+	// prInfo("kernel", "Preparing to enable paging, current code at %p", (void*)&&current_position);
 current_position:
 	// Make sure this code location is mapped
 	Paging::MapPage((uint64_t)&&current_position & ~0xFFF, (uint64_t)&&current_position & ~0xFFF);
@@ -119,55 +112,8 @@ current_position:
 	prInfo("kernel", "Enabling paging...");
 	Paging::Enable();
 	
-	if (Paging::IsEnabled()) {
-		prInfo("kernel", "Paging successfully enabled");
-		
-		// Test that mapped page is accessible
-		uint64_t* testPtr = (uint64_t*)testVirtAddr;
-		*testPtr = 0xDEADBEEF; // Write test pattern
-		
-		if (*testPtr == 0xDEADBEEF) {
-			prInfo("paging", "Virtual memory test passed: wrote and read 0xDEADBEEF at 0x%x", testVirtAddr);
-		} else {
-			prErr("paging", "Virtual memory test failed at 0x%x", testVirtAddr);
-		}
-		
-		// Get physical address and verify
-		uint64_t resolvedPhys = Paging::GetPhysicalAddress(testVirtAddr);
-		prInfo("paging", "Virtual 0x%x resolves to physical 0x%x", testVirtAddr, resolvedPhys);
-		
-		// Clean up test page
-		Paging::UnmapPage(testVirtAddr);
-		prInfo("paging", "Unmapped test page at 0x%x", testVirtAddr);
-	} else {
-		prErr("kernel", "Failed to enable paging");
-		while(1) asm("hlt");
-	}
-	
 	// Initialize heap at 4MB with 1MB size initially
 	Heap::Initialize(0x4000000, 0x100000);
-	
-	// Test heap allocator
-	prInfo("kernel", "Testing heap allocator...");
-	
-	// Test 1: Basic allocation
-	void* block1 = Heap::Allocate(1024);
-	void* block2 = Heap::Allocate(2048);
-	void* block3 = Heap::Allocate(4096);
-	
-	prInfo("heap", "Allocated blocks at: 0x%x, 0x%x, 0x%x", 
-		   (uint64_t)block1, (uint64_t)block2, (uint64_t)block3);
-
-	// Test 2: Free and reallocate
-	Heap::Free(block2);  // Free middle block
-	void* block4 = Heap::Allocate(1024);  // Should reuse part of freed space
-	prInfo("heap", "Reallocated block at: 0x%x", (uint64_t)block4);
-
-	// Test 3: Merge blocks
-	Heap::Free(block1);
-	Heap::Free(block4);  // Should merge with block1's space
-	void* block5 = Heap::Allocate(2048);  // Should use merged space
-	prInfo("heap", "Merged allocation at: 0x%x", (uint64_t)block5);
 
 	// Create IDT
 	Interrupts::CreateIDT();
@@ -305,11 +251,11 @@ void TestVirtualMemoryMapping() {
 
 void processCommand(const char* command) {
     // Debug the entire command as received
-    kprintf("\n[DEBUG] Processing command: ");
-    for (int i = 0; command[i]; i++) {
-        kprintf("0x%x ", command[i]);
-    }
-    kprintf("\n");
+    // kprintf("\n[DEBUG] Processing command: ");
+    // for (int i = 0; command[i]; i++) {
+    //     kprintf("0x%x ", command[i]);
+    // }
+    // kprintf("\n");
     
     if (strcmp(command, "shutdown") == 0 || strcmp(command, "exit") == 0) {
         kprintf("\nShutting down...\n");
@@ -332,9 +278,183 @@ void processCommand(const char* command) {
         }
         
         if (port_num >= 0) {
+            // Get device information
+            ahci_device_t* device = ahci_get_device_info(port_num);
+            
+            // Handle missing sector information
+            if (device->sector_count == 0) {
+                kprintf("WARNING: Device reports 0 sectors, using default count of 2048\n");
+                device->sector_count = 2048;
+            }
+            
+            if (device->sector_size == 0) {
+                kprintf("WARNING: Device reports 0 sector size, using default size of 512 bytes\n");
+                device->sector_size = 512;
+            }
+            
+            // Print correct device information
+            kprintf("Disk on port %d: %u sectors, %u bytes per sector\n", 
+                    port_num, (unsigned int)device->sector_count, device->sector_size);
+            
+            unsigned long long total_size = (unsigned long long)device->sector_count * device->sector_size;
+            unsigned int size_mb = (unsigned int)(total_size / (1024 * 1024));
+            
+            kprintf("Total disk size: %u bytes (%u MB)\n", 
+                    (unsigned int)total_size, size_mb);
+            
+            // Attempt to detect filesystem
             int fs_type = ahci_detect_filesystem(port_num);
             if (fs_type < 0) {
-                kprintf("Failed to detect filesystem\n");
+                kprintf("Failed to detect filesystem (error code: %d)\n", fs_type);
+                kprintf("Checking if device is accessible...\n");
+                
+                // Try to read the first sector as a test
+                void* test_buffer = malloc(device->sector_size);
+                if (test_buffer) {
+                    memset(test_buffer, 0, device->sector_size);
+                    int read_result = ahci_read_sectors(port_num, 0, 1, test_buffer);
+                    if (read_result == 0) {
+                        kprintf("Successfully read first sector. Device is accessible.\n");
+                        
+                        // Dump first 32 bytes of the sector for debugging
+                        kprintf("First 32 bytes of sector 0:\n");
+                        uint8_t* bytes = (uint8_t*)test_buffer;
+                        for (int i = 0; i < 32; i++) {
+                            kprintf("%02x ", bytes[i]);
+                            if ((i + 1) % 16 == 0) kprintf("\n");
+                        }
+                        kprintf("\n");
+                    } else {
+                        kprintf("Failed to read first sector, error: %d\n", read_result);
+                    }
+                    free(test_buffer);
+                }
+            } else {
+                kprintf("Detected filesystem type: %d\n", fs_type);
+                switch (fs_type) {
+                    case FS_TYPE_EXT2:
+                        kprintf("Filesystem: EXT2\n");
+                        break;
+                    case FS_TYPE_EXT4:
+                        kprintf("Filesystem: EXT4\n");
+                        break;
+                    case FS_TYPE_FAT:
+                        kprintf("Filesystem: FAT (generic)\n");
+                        break;
+                    case FS_TYPE_FAT12:
+                        kprintf("Filesystem: FAT12\n");
+                        break;
+                    case FS_TYPE_FAT16:
+                        kprintf("Filesystem: FAT16\n");
+                        break;
+                    case FS_TYPE_FAT32:
+                        kprintf("Filesystem: FAT32\n");
+                        break;
+                    default:
+                        kprintf("Filesystem: Unknown (%d)\n", fs_type);
+                        break;
+                }
+            }
+        } else {
+            kprintf("No SATA devices found\n");
+        }
+    } else if (strcmp(command, "ls") == 0) {
+        // Find the first available device
+        int port_num = -1;
+        for (int i = 0; i < AHCI_MAX_PORTS; i++) {
+            ahci_device_t* dev = ahci_get_device_info(i);
+            if (dev && dev->is_present) {
+                port_num = i;
+                break;
+            }
+        }
+        
+        if (port_num >= 0) {
+            // Try to detect the filesystem type
+            int fs_type = ahci_detect_filesystem(port_num);
+            
+            // If it's an EXT2 filesystem (or we're assuming it for testing)
+            if (fs_type == FS_TYPE_EXT2 || fs_type == FS_TYPE_EXT4) {
+                // kprintf("Found EXT2/EXT4 filesystem (type: %d)\n", fs_type);
+                // kprintf("Attempting to initialize EXT2 filesystem...\n");
+                
+                // Attempt to initialize the filesystem
+                if (!FS::EXT2::Initialize(port_num)) {
+                    kprintf("Standard initialization failed, testing different options...\n");
+                    
+                    // If standard initialization fails, let's try a direct sector read
+                    ahci_device_t* device = ahci_get_device_info(port_num);
+                    
+                    // Ensure valid sector size
+                    uint32_t sector_size = device->sector_size;
+                    if (sector_size == 0) {
+                        kprintf("Invalid sector size, using default 512 bytes\n");
+                        sector_size = 512;
+                    }
+                    
+                    // Try reading the first few sectors directly
+                    void* buffer = malloc(sector_size * 4);  // Read 4 sectors
+                    if (buffer) {
+                        memset(buffer, 0, sector_size * 4);
+                        kprintf("Reading first 4 sectors directly...\n");
+                        
+                        int result = ahci_read_sectors(port_num, 0, 4, buffer);
+                        if (result == 0) {
+                            kprintf("Successfully read first 4 sectors\n");
+                            
+                            // Dump the first 32 bytes for debugging
+                            uint8_t* bytes = (uint8_t*)buffer;
+                            kprintf("First 32 bytes of disk:\n");
+                            for (int i = 0; i < 32; i++) {
+                                kprintf("%02x ", bytes[i]);
+                                if ((i + 1) % 16 == 0) kprintf("\n");
+                            }
+                            kprintf("\n");
+                            
+                            // Look for filesystem signatures
+                            if (bytes[510] == 0x55 && bytes[511] == 0xAA) {
+                                kprintf("Found boot sector signature (55 AA) at offset 510\n");
+                            }
+                        } else {
+                            kprintf("Failed to read sectors, error: %d\n", result);
+                        }
+                        free(buffer);
+                    }
+                    
+                    kprintf("Failed to initialize EXT2 filesystem\n");
+                } else {
+                    // kprintf("EXT2 filesystem initialized successfully\n");
+                    
+                    // Attempt to read and list the root directory
+                    // if (!FS::EXT2::ReadRootDirectory(port_num)) {
+                    //     kprintf("Failed to read root directory\n");
+                    // }
+                }
+            } else {
+                if (fs_type < 0) {
+                    kprintf("Failed to detect filesystem (error: %d)\n", fs_type);
+                } else {
+                    kprintf("Filesystem type %d not supported by ls command\n", fs_type);
+                    
+                    // Print the detected filesystem type
+                    switch (fs_type) {
+                        case FS_TYPE_FAT:
+                            kprintf("Detected FAT filesystem (generic)\n");
+                            break;
+                        case FS_TYPE_FAT12:
+                            kprintf("Detected FAT12 filesystem\n");
+                            break;
+                        case FS_TYPE_FAT16:
+                            kprintf("Detected FAT16 filesystem\n");
+                            break;
+                        case FS_TYPE_FAT32:
+                            kprintf("Detected FAT32 filesystem\n");
+                            break;
+                        default:
+                            kprintf("Unknown filesystem type: %d\n", fs_type);
+                            break;
+                    }
+                }
             }
         } else {
             kprintf("No SATA devices found\n");
@@ -353,98 +473,6 @@ __attribute__((ms_abi)) [[noreturn]] void main(BOB* bob) {
     // Once finished say hello and halt
     prInfo("kernel", "Done!");
     prInfo("kernel", "Boot time: %ds", render);
-
-    // Test brk
-    uint64_t current_break;
-    asm volatile(
-        "push %%rdi\n"      // Save registers we'll use
-        "push %%rax\n"
-        "movq $0, %%rdi\n"  // Query current break
-        "movq $12, %%rax\n" // SYS_BRK
-        "int $0x80\n"       // Do syscall
-        "movq %%rax, %0\n"  // Save result before restoring
-        "pop %%rax\n"       // Restore registers
-        "pop %%rdi"
-        : "=m"(current_break) // Output to memory
-        :: "memory"
-    );
-    
-    prInfo("kernel", "Current break: 0x%x", current_break);
-
-    // Set new break
-    uint64_t new_break = current_break + 8192;
-    asm volatile(
-        "push %%rdi\n"      // Save registers we'll use
-        "push %%rax\n"
-        "movq %0, %%rdi\n"  // New break value
-        "movq $12, %%rax\n" // SYS_BRK
-        "int $0x80\n"       // Do syscall
-        "pop %%rax\n"       // Restore registers
-        "pop %%rdi"
-        :: "m"(new_break) : "memory"
-    );
-    
-    prInfo("kernel", "Set break to: 0x%x", new_break);
-
-    // Test mmap
-    uint64_t mmap_addr = 0;           // Let kernel choose address
-    uint64_t mmap_size = 0x2000;      // 8KB
-    uint64_t mmap_prot = 0x3;         // PROT_READ | PROT_WRITE
-    uint64_t mmap_flags = 0x22;       // MAP_PRIVATE | MAP_ANONYMOUS
-    uint64_t mmap_fd = -1;            // No file descriptor for anonymous mapping
-    uint64_t mmap_offset = 0;         // No offset for anonymous mapping
-    uint64_t mmap_result;
-
-    asm volatile(
-        "push %%rdi\n"      // Save registers we'll use
-        "push %%rsi\n"
-        "push %%rdx\n"
-        "push %%r10\n"
-        "push %%r8\n"
-        "push %%r9\n"
-        "push %%rax\n"
-        "movq %1, %%rdi\n"  // addr
-        "movq %2, %%rsi\n"  // len
-        "movq %3, %%rdx\n"  // prot
-        "movq %4, %%r10\n"  // flags
-        "movq %5, %%r8\n"   // fd
-        "movq %6, %%r9\n"   // offset
-        "movq $9, %%rax\n"  // SYS_MMAP
-        "int $0x80\n"       // Do syscall
-        "movq %%rax, %0\n"  // Save result
-        "pop %%rax\n"       // Restore registers
-        "pop %%r9\n"
-        "pop %%r8\n"
-        "pop %%r10\n"
-        "pop %%rdx\n"
-        "pop %%rsi\n"
-        "pop %%rdi"
-        : "=m"(mmap_result)  // Output
-        : "m"(mmap_addr), "m"(mmap_size), "m"(mmap_prot),
-          "m"(mmap_flags), "m"(mmap_fd), "m"(mmap_offset)
-        : "memory"
-    );
-    
-    prInfo("kernel", "mmap returned: 0x%x", mmap_result);
-
-    const char* str1 = "Hello, World!";
-    const char* str2 = "Hello, World!";
-    const char* str3 = "Hello, Inferno!";
-
-    int result1 = memcmp(str1, str2, 13);
-    int result2 = memcmp(str1, str3, 13);
-    prInfo("kernel", "memcmp result1: %d", result1);
-    prInfo("kernel", "memcmp result2: %d", result2);
-    
-    // Run our simplified VM aliasing test - this doesn't try to break down 2MB pages
-    // or manipulate page tables directly
-    prInfo("kernel", "Starting simplified VM aliasing test");
-    if (SimpleVMAliasTest::Test()) {
-        prInfo("kernel", "Virtual memory aliasing test PASSED");
-    } else {
-        prErr("kernel", "Virtual memory aliasing test FAILED");
-    }
-
     // Buffer to store user input
     char inputBuffer[256];
 

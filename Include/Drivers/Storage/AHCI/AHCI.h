@@ -2,6 +2,16 @@
 
 #include <Inferno/stdint.h>
 
+// Filesystem type definitions
+#define FS_TYPE_UNKNOWN 0
+#define FS_TYPE_EXT2    1
+#define FS_TYPE_EXT4    2
+#define FS_TYPE_FAT     3
+#define FS_TYPE_EXFAT   4
+#define FS_TYPE_FAT12   5
+#define FS_TYPE_FAT16   6
+#define FS_TYPE_FAT32   7
+
 // AHCI Spec Version 1.3.1 Definitions
 
 // Maximum number of ports supported by AHCI

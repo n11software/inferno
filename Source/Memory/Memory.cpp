@@ -88,7 +88,7 @@ namespace Memory {
 					ptr[j] = 0;
 				}
 
-				prInfo("memory", "allocated page 0x%x (used=%d/%d)", (uint64_t)page, usedPages, totalPages);
+				// prInfo("memory", "allocated page 0x%x (used=%d/%d)", (uint64_t)page, usedPages, totalPages);
 				return page;
 			}
 		}

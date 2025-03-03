@@ -92,7 +92,7 @@ namespace Paging {
 				current_pt->entries[j] = phys_addr | PAGE_DEFAULT;
 			}
 			
-			prInfo("paging", "Mapped 2MB region at 0x%x", i * 0x200000);
+			// prInfo("paging", "Mapped 2MB region at 0x%x", i * 0x200000);
 		}
 
 		// Get proper kernel bounds
@@ -126,7 +126,7 @@ namespace Paging {
 			uint64_t page = stack_page + (i * 0x1000);
 			MapPage(page, page);
 		}
-		prInfo("paging", "Mapped current stack region around 0x%x", stack_page);
+		// prInfo("paging", "Mapped current stack region around 0x%x", stack_page);
 
 		// Map the framebuffer region (assuming it's somewhere above 16MB)
 		// This is crucial for continued console output
@@ -148,7 +148,7 @@ namespace Paging {
 		uint64_t trampoline_page = (uint64_t)&SafeCR3Load & ~0xFFF;
 		MapPage(trampoline_page, trampoline_page);
 		
-		prInfo("paging", "Page tables initialized");
+		// prInfo("paging", "Page tables initialized");
 		
 		// Re-enable interrupts before returning
 		asm volatile("sti");
@@ -274,7 +274,7 @@ namespace Paging {
 
 	void Enable() {
 		uint64_t pml4_addr = (uint64_t)pml4;
-		prInfo("paging", "Loading page tables from 0x%x", pml4_addr);
+		// prInfo("paging", "Loading page tables from 0x%x", pml4_addr);
 		
 		// Critical: disable interrupts during CR3 switch
 		asm volatile("cli");
@@ -283,14 +283,14 @@ namespace Paging {
 		SafeCR3Load(pml4_addr);
 		
 		// If we get here, the CR3 switch was successful
-		prInfo("paging", "Successfully loaded new page tables");
+		// prInfo("paging", "Successfully loaded new page tables");
 		
 		// Re-enable interrupts
 		asm volatile("sti");
 		
 		// Verify paging is enabled (it should be in x64 mode)
 		if (IsEnabled()) {
-			prInfo("paging", "Paging verified as enabled");
+			// prInfo("paging", "Paging verified as enabled");
 		} else {
 			prErr("paging", "WARNING: Paging appears to be disabled - this should not happen in x64 mode");
 		}
